@@ -1,0 +1,51 @@
+{
+  "name": "labcarlosaraya-backend",
+  "version": "0.6.8",
+  "description": "Proyecto base para el backend realizado con Node",
+  "main": "src/index.js",
+  "author": "Ciris Informatic Solutions",
+  "scripts": {
+    "lint": "eslint src/*.js src/**/*.js",
+    "test": "DEBUG=ciris:* babel-tape-runner ./src/**/*.spec.js | tap-summary",
+    "dev": "DEBUG=ciris:* nodemon -w src --exec \"npm run lint; babel-node src\"",
+    "build": "npx rimraf dist; babel src -s -D -d dist"
+  },
+  "engines": {
+    "node": "~8.9.x",
+    "npm": "~5.6.x",
+    "cpu": [
+      "x64",
+      "ia32"
+    ]
+  },
+  "dependencies": {
+    "axios": "0.17.1",
+    "bcrypt": "1.0.3",
+    "body-parser": "1.18.2",
+    "cors": "2.8.4",
+    "debug": "3.1.0",
+    "express": "4.16.2",
+    "jwt-simple": "0.5.1",
+    "lodash": "4.17.4",
+    "moment": "2.20.1",
+    "mongoose": "4.13.9",
+    "mongoose-auto-increment": "5.0.1",
+    "tape": "4.8.0"
+  },
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.0",
+    "babel-plugin-envify": "1.2.1",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-minify": "0.2.0",
+    "babel-tape-runner": "2.0.1",
+    "chalk": "2.3.0",
+    "eslint": "4.15.0",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-plugin-import": "2.8.0",
+    "nodemon": "1.14.11",
+    "rimraf": "2.6.2",
+    "semver": "5.5.0",
+    "tap-summary": "4.0.0"
+  }
+}

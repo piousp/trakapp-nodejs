@@ -1,0 +1,26 @@
+before_script:
+  - . ~/.nvm/nvm.sh
+  - nvm use 6.11.4
+  - npm install -g gulp
+  - npm install -g forever
+
+cache:
+  paths:
+    - node_modules/
+
+stages:
+  - deploy
+
+deploy_master:
+  stage: deploy
+  script:
+    - npm install
+    - rsync -rlDv --delete * /software/backend/
+    - sh /software/backend/produccion.sh
+  environment:
+    name: master
+    url: ciriscr.com:3001
+  only:
+  - master
+  tags:
+  - vue-base
