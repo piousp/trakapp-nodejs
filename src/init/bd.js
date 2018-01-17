@@ -1,9 +1,9 @@
 import D from "debug";
 import mongoose from "mongoose";
-import config from "./config.js";
+import entorno from "../entorno.js";
 
 const debug = D("ciris:bd.js");
-mongoose.connect(config.MONGO_URI);
+mongoose.connect(entorno.MONGO_URI);
 
 const db = mongoose.connection;
 db.on("error", (error) => {

@@ -1,4 +1,4 @@
-# Laboratorio Carlos Araya - Backend
+# Proyecto Base - Backend
 Ahora se usa ES6 (Ecmascript 2015). Referencias: (http://es6-features.org/)[http://es6-features.org/#Constants]
 
 ## Versiones e instalación

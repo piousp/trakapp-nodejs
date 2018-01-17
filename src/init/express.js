@@ -6,13 +6,12 @@ import _ from "lodash";
 import entorno from "../entorno.js";
 import pkgJson from "../../package.json";
 import { estaAutorizado } from "../login/middleware.js";
-import configRutas from "./configRutas.js";
 
 const debug = D("ciris:rest/init.js");
 debug("Iniciando el proceso");
 const origenes = procesarOrigenes(entorno.ORIGIN);
 
-export default function initApp() {
+export default function initApp(configRutas) {
   let app = express();
   app = configurarCors(app);
   app = configurarBodyParse(app);

@@ -1,6 +1,6 @@
 import jwt from "jwt-simple";
 import moment from "moment";
-import config from "../config.js";
+import entorno from "../entorno.js";
 
 export { estaAutorizado, crearJWT };
 
@@ -32,7 +32,7 @@ function token(req) {
 }
 
 function decodificar(tokenReq) {
-  return jwt.decode(tokenReq, config.TOKEN_SECRET);
+  return jwt.decode(tokenReq, entorno.TOKEN_SECRET);
 }
 
 function crearJWT(usuario) {
@@ -42,5 +42,5 @@ function crearJWT(usuario) {
     exp: moment().add(1, "years")
       .unix(),
   };
-  return jwt.encode(payload, config.TOKEN_SECRET);
+  return jwt.encode(payload, entorno.TOKEN_SECRET);
 }

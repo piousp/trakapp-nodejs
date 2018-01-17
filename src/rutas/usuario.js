@@ -1,7 +1,7 @@
 import express from "express";
 import _ from "lodash";
 import { modelo } from "../modelos/usuario.js";
-import { Comunes as Comun } from "../commons/db.js";
+import { Comunes as Comun } from "../commons/bd.js";
 
 const router = express.Router();
 const comun = new Comun(modelo);
