@@ -39,7 +39,7 @@ function encriptar(usuario, next) {
   });
 }
 
-esquema.pre("save", (next) => {
+esquema.pre("save", function (next) { //eslint-disable-line
   const usuario = this;
   if (!usuario.isModified("password")) {
     return next();

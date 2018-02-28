@@ -4,41 +4,41 @@ import bodyParser from "body-parser";
 import D from "debug";
 import _ from "lodash";
 import entorno from "../entorno.js";
+import initDB from "./bd.js";
 import pkgJson from "../../package.json";
-import { estaAutorizado } from "../login/middleware.js";
 
-const debug = D("ciris:rest/init.js");
+const debug = D("ciris:init/express.js");
 debug("Iniciando el proceso");
 const origenes = procesarOrigenes(entorno.ORIGIN);
 
 export default function initApp(configRutas) {
-  let app = express();
-  app = configurarCors(app);
-  app = configurarBodyParse(app);
-  app = rutasBase(app);
-  app = configRutas(app, estaAutorizado);
-  return iniciarOyente(app);
+  debug("Booteando...");
+  const pipe = _.flow([configurarCors, configurarBodyParse, configRutas, rutasBase, iniciarOyente]);
+  initDB();
+  return pipe(express());
 }
 
-function configurarCors(apCor) {
+function configurarCors(app) {
   const corsOptions = {
     origin: origenes,
     credentials: true,
   };
 
   debug("Configurando el CORS");
-  apCor.options("*", cors(corsOptions));
-  return apCor;
+  const corsIns = cors(corsOptions);
+  app.options("*", corsIns);
+  app.use(corsIns);
+  return app;
 }
 
 
-function configurarBodyParse(appBP) {
+function configurarBodyParse(app) {
   debug("Configurando el servidor con el body parser de JSON");
-  appBP.use(bodyParser.urlencoded({
+  app.use(bodyParser.urlencoded({
     extended: true,
   }));
-  appBP.use(bodyParser.json());
-  return appBP;
+  app.use(bodyParser.json());
+  return app;
 }
 
 function rutasBase(appRu) {

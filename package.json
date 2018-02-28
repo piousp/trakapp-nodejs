@@ -5,10 +5,11 @@
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",
   "scripts": {
-    "lint": "eslint src/*.js src/**/*.js",
-    "test": "DEBUG=ciris:* babel-tape-runner ./src/**/*.spec.js | tap-summary",
-    "dev": "DEBUG=ciris:* nodemon -w src --exec \"npm run lint; babel-node src\"",
-    "build": "npx rimraf dist; babel src -s -D -d dist"
+    "lint": "eslint --fix src/*.js",
+    "test": "cross-env DEBUG=ciris:* babel-tape-runner ./src/**/*.spec.js | tap-summary",
+    "coverage": "nyc  babel-tape-runner ./src/**/*.js | tap-nyc; nyc report --reporter=text-summary",
+    "dev": "cross-env DEBUG=ciris:* nodemon -w src --exec \"npm run lint; babel-node src\"",
+    "build": "cross-env NODE_ENV=production npx rimraf dist; babel src -s -D -d dist --ignore *.spec.js"
   },
   "engines": {
     "node": "~8.9.x",
@@ -28,7 +29,7 @@
     "jwt-simple": "0.5.1",
     "lodash": "4.17.4",
     "moment": "2.20.1",
-    "mongoose": "4.13.9",
+    "mongoose": "5.0.0",
     "mongoose-auto-increment": "5.0.1",
     "tape": "4.8.0"
   },
@@ -40,12 +41,15 @@
     "babel-preset-minify": "0.2.0",
     "babel-tape-runner": "2.0.1",
     "chalk": "2.3.0",
+    "cross-env": "5.1.3",
     "eslint": "4.15.0",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.8.0",
     "nodemon": "1.14.11",
+    "nyc": "11.4.1",
     "rimraf": "2.6.2",
     "semver": "5.5.0",
+    "tap-nyc": "1.0.3",
     "tap-summary": "4.0.0"
   }
 }
