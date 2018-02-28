@@ -1,6 +1,6 @@
 import jwt from "jwt-simple";
 import moment from "moment";
-import entorno from "../entorno.js";
+import entorno from "../../entorno.js";
 
 export { estaAutorizado, crearJWT };
 

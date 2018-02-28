@@ -1,7 +1,6 @@
 before_script:
   - . ~/.nvm/nvm.sh
-  - nvm use 6.11.4
-  - npm install -g gulp
+  - nvm use 8.9.4
   - npm install -g forever
 
 cache:
@@ -11,16 +10,15 @@ cache:
 stages:
   - deploy
 
-deploy_master:
+deploy_desarrollo:
   stage: deploy
   script:
     - npm install
-    - rsync -rlDv --delete * /software/backend/
-    - sh /software/backend/produccion.sh
+    - npm run build
+    - rsync -rlDv --delete * /software/lab-carlos-araya/backend/
+    - sh /software/lab-carlos-araya/backend/produccion.sh
   environment:
-    name: master
+    name: desarrollo
     url: ciriscr.com:3001
   only:
-  - master
-  tags:
-  - vue-base
+  - desarrollo

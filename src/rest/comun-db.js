@@ -17,7 +17,7 @@ Comunes.prototype.create = create;
 Comunes.prototype.delete = deleteOne;
 Comunes.prototype.efectuarCambio = efectuarCambio;
 
-function find(pquery, pagination) {
+function find(pquery, pagination, populate) {
   debug("find");
   const este = this;
   const query = pquery || { borrado: false };
@@ -26,23 +26,22 @@ function find(pquery, pagination) {
     const docs = este.modelo
       .find(query, { password: 0 })
       .skip(abs.total)
-      .limit(abs.cantidad);
+      .limit(abs.cantidad)
+      .populate(populate || "")
+      .lean();
     docs.exec((err, resp) => {
       debug("Ejecuté el query");
       if (err) {
-        debug("ALgo pasó", err);
+        debug("Algo pasó", err);
         reject(err);
       }
       este.modelo.count(query, (err2, cant) => {
-        debug("Contando a los mabeles");
+        debug("Contando objetos");
         if (err2) {
-          debug("Algo pasó Contando a los mabeles", err2);
+          debug("Algo pasó contando objetos", err2);
           reject(err2);
         }
-        debug("Todo bien", {
-          docs: resp,
-          cant,
-        });
+        debug("Busqueda éxitosa");
         resolve({
           docs: resp,
           cant,
@@ -52,7 +51,7 @@ function find(pquery, pagination) {
   }));
 }
 
-function findOne(pid, pquery) {
+function findOne(pid, pquery, populate) {
   const este = this;
   const query = pquery || { _id: pid, borrado: false };
   return new Promise(((resolve, reject) => {
@@ -64,7 +63,8 @@ function findOne(pid, pquery) {
         reject("No existe");
       }
       resolve(obj);
-    }).lean();
+    }).lean()
+      .populate(populate || "");
   }));
 }
 
@@ -94,12 +94,11 @@ function create(body) {
   return new Promise(((resolve, reject) => {
     este.modelo.create(body, (err, obj) => {
       if (err) {
-        reject(err);
+        debug("Error creando");
+        return reject(err);
       }
-      if (_.isEmpty(obj)) {
-        reject("No existe");
-      }
-      resolve(obj);
+      debug("Objeto creando");
+      return resolve(obj);
     });
   }));
 }
@@ -107,7 +106,7 @@ function create(body) {
 function deleteOne(pid) {
   const este = this;
   return new Promise(((resolve, reject) => {
-    este.modelo.remove({ _id: pid }, (err) => {
+    este.modelo.delete({ _id: pid }, (err) => {
       if (err) {
         reject(err);
       }
