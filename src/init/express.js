@@ -13,7 +13,7 @@ const origenes = procesarOrigenes(entorno.ORIGIN);
 
 export default function initApp(configRutas) {
   debug("Booteando...");
-  const pipe = _.flow([configurarCors, configurarBodyParse, configRutas, rutasBase, iniciarOyente]);
+  const pipe = _.flow([configurarCors, configurarBodyParse, configRutas, rutasBase]);
   initDB();
   return pipe(express());
 }
@@ -62,13 +62,6 @@ function rutasBase(appRu) {
     res.status(500).send("Error del servidor");
   });
   return appRu;
-}
-
-function iniciarOyente(appO) {
-  const puerto = entorno.PUERTO;
-  appO.listen(puerto);
-  debug(`Servidor iniciado en puerto ${puerto}`);
-  return appO;
 }
 
 function procesarOrigenes(string) {
