@@ -4,8 +4,14 @@ const esquema = new mongoose.Schema({
   nombre: String,
   apellidos: String,
   position: {
-    lat: Number,
-    lng: Number,
+    lat: {
+      type: Number,
+      default: 0.0,
+    },
+    lng: {
+      type: Number,
+      default: 0.0,
+    },
   },
   borrado: {
     type: Boolean, default: false, select: false, index: true,

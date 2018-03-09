@@ -23,7 +23,6 @@ export default (io) => {
   function putID(req, res) {
     comun.findOneAndUpdate(req.params.id, req.body)
       .then((obj) => {
-        console.log(io.sockets);
         io.sockets.emit("actualizarPosicion", obj);
         return res.json(obj);
       }, error(res));
