@@ -32,7 +32,7 @@ function deleteID(req, res) {
   comun.delete(req.params.id).then(ok(res), error(res));
 }
 
-function ok(res) {  
+function ok(res) {
   return obj => res.json(obj);
 }
 
