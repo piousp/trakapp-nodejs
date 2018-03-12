@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const esquema = new mongoose.Schema({
-  titulo: {
+  title: {
     type: String, required: true,
   },
   start: {
