@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 
 const esquema = new mongoose.Schema({
-  nombre: String,
+  nombre: {
+    type: String,
+    required: true,
+  },
   apellidos: String,
   position: {
     lat: {

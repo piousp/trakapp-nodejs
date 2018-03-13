@@ -105,8 +105,9 @@ function create(body) {
 
 function deleteOne(pid) {
   const este = this;
+  const opciones = { multi: false, upsert: false };
   return new Promise(((resolve, reject) => {
-    este.modelo.delete({ _id: pid }, (err) => {
+    este.modelo.update({ _id: pid }, { $set: { borrado: true } }, opciones, (err) => {
       if (err) {
         reject(err);
       }

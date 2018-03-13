@@ -4,6 +4,7 @@ import servidor from "./init/express.js";
 // import { estaAutorizado } from "./rest/login/middleware.js";
 import emailPass from "./rest/login/emailPass.js";
 import empleados from "./rest/rutas/empleado.js";
+import tareas from "./rest/rutas/tarea.js";
 import entorno from "./entorno.js";
 
 import { modelo } from "./rest/modelos/usuario.js";
@@ -18,6 +19,7 @@ servidor((app) => {
   debug("Inicializando las rutas");
   app.use("/api/auth", emailPass);
   app.use("/api/empleado", empleados(socket));
+  app.use("/api/tarea", tareas);
 
   revisarPorRoot();
 
