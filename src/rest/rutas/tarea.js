@@ -1,5 +1,6 @@
 import express from "express";
 import _ from "lodash";
+// import moment from "moment";
 import { tarea } from "../modelos/tarea.js";
 import { Comunes as Comun } from "../comun-db.js";
 
@@ -17,7 +18,14 @@ function getID(req, res) {
 }
 
 function getBase(req, res) {
-  comun.find(null, req.query).then(ok(res), error(res));
+  const query = {
+    borrado: false,
+    start: {
+      $gte: req.query.fechaInicio,
+      $lte: req.query.fechaFin,
+    },
+  };
+  comun.find(query).then(ok(res), error(res));
 }
 
 function putID(req, res) {
