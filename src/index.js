@@ -5,6 +5,7 @@ import servidor from "./init/express.js";
 import emailPass from "./rest/login/emailPass.js";
 import empleados from "./rest/rutas/empleado.js";
 import tareas from "./rest/rutas/tarea.js";
+import mensajes from "./rest/rutas/mensaje.js";
 import entorno from "./entorno.js";
 
 import { modelo } from "./rest/modelos/usuario.js";
@@ -20,6 +21,7 @@ servidor((app) => {
   app.use("/api/auth", emailPass);
   app.use("/api/empleado", empleados(socket));
   app.use("/api/tarea", tareas);
+  app.use("/api/mensaje", mensajes);
 
   revisarPorRoot();
 
