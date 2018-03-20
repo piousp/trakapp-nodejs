@@ -21,6 +21,7 @@
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
     "no-underscore-dangle": [2,{"allow": ["_id"]}],
     "prefer-promise-reject-errors": "off",
-    "vue/max-attributes-per-line": "off"
+    "vue/max-attributes-per-line": "off",
+    "lodash/prefer-lodash-method": "off"
   }
 }
