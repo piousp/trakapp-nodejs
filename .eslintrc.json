@@ -4,9 +4,14 @@
     "es6": true,
     "node": true
   },
-  "plugins": [],
+  "plugins": [
+    "lodash",
+    "promise"
+  ],
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "plugin:lodash/recommended",
+    "plugin:promise/recommended"
   ],
   "rules": {
     "semi": ["error", "always"],
@@ -15,6 +20,7 @@
     "import/extensions": ["always", {"ignorePackages": true}],
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
     "no-underscore-dangle": [2,{"allow": ["_id"]}],
-    "prefer-promise-reject-errors": "off"
+    "prefer-promise-reject-errors": "off",
+    "lodash/prefer-lodash-method": "off"
   }
 }
