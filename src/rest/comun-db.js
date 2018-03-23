@@ -1,4 +1,4 @@
-import _ from "lodash";
+import isEmpty from "lodash/isEmpty";
 import D from "debug";
 
 const debug = D("ciris:commons/db.js");
@@ -59,7 +59,7 @@ function findOne(pid, pquery, populate) {
       if (err) {
         reject(err);
       }
-      if (_.isEmpty(obj)) {
+      if (isEmpty(obj)) {
         reject("No existe");
       }
       resolve(obj);
@@ -81,7 +81,7 @@ function findOneAndUpdate(pid, pbody, pquery, popciones) {
         if (err) {
           reject(err);
         }
-        if (_.isEmpty(obj)) {
+        if (isEmpty(obj)) {
           reject("No existe");
         }
         resolve(obj);
@@ -128,7 +128,7 @@ function efectuarCambio(pid, pcambio, popciones, pquery) {
         if (err) {
           reject(err);
         }
-        if (_.isEmpty(obj)) {
+        if (isEmpty(obj)) {
           reject("No existe");
         }
         resolve(obj);

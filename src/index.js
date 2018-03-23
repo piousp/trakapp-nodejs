@@ -21,18 +21,15 @@ servidor((app) => {
 
 function revisarPorRoot() {
   debug("Revisando por Root...");
-  comun.findOne(null, { correo: "root" }).then(
-    () => debug("Root encontrado!"),
-    () => {
+  comun.findOne(null, { correo: "root" })
+    .then(() => debug("Root encontrado!"))
+    .catch(() => {
       debug("Root no encontrado, creando...");
       const usuarioRoot = {
         correo: "root",
         password: "cirisCiris.93",
         nombre: "root",
       };
-      return comun.create(usuarioRoot).then(() => {
-        debug("Root creado!");
-      });
-    },
-  );
+      return comun.create(usuarioRoot).then(() => debug("Root creado!"));
+    });
 }
