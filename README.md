@@ -24,13 +24,13 @@ npm run lint
 ### Tests (Unidad)
 Ejecuta todos los tests que se encuentren dentro de `src`. Los archivos debe tener un nombre que cumpla con el siguiente regex: `\w+\.spec\.js`, o humanamente: `xxxx.spec.js`
 ``` bash
-npm run test
+npm test
 ```
 
 ### Correr para desarrollo
 Ejecuta el linter y reinicia el proceso al encontrar cambios en el código
 ``` bash
-npm run dev
+npm start
 ```
 
 ### Transpilar para producción
