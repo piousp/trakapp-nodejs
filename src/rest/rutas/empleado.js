@@ -1,5 +1,5 @@
 import express from "express";
-import _ from "lodash";
+import isEmpty from "lodash/isEmpty";
 import { empleado } from "../modelos/empleado.js";
 import { Comunes as Comun } from "../comun-db.js";
 
@@ -13,11 +13,15 @@ export default (io) => {
   router.post("/", postBase);
 
   function getID(req, res) {
-    comun.findOne(req.params.id).then(ok(res), error(res));
+    comun.findOne(req.params.id)
+      .then(ok(res))
+      .catch(error(res));
   }
 
   function getBase(req, res) {
-    comun.find().then(ok(res), error(res));
+    comun.find()
+      .then(ok(res))
+      .catch(error(res));
   }
 
   function putID(req, res) {
@@ -25,11 +29,14 @@ export default (io) => {
       .then((obj) => {
         io.sockets.emit("actualizarPosicion", obj);
         return res.json(obj);
-      }, error(res));
+      })
+      .catch(error(res));
   }
 
   function postBase(req, res) {
-    comun.create(req.body).then(ok(res), error(res));
+    comun.create(req.body)
+      .then(ok(res))
+      .catch(error(res));
   }
 
   function ok(res) {
@@ -38,7 +45,7 @@ export default (io) => {
 
   function error(res) {
     return (err) => {
-      if (_.isEmpty(err)) {
+      if (isEmpty(err)) {
         return res.status(200).send({});
       }
       return res.status(500).send(err);
