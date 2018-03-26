@@ -1,19 +1,22 @@
 {
-  "name": "labcarlosaraya-backend",
-  "version": "0.6.8",
+  "name": "nodejs-backend",
+  "version": "1.0.0",
   "description": "Proyecto base para el backend realizado con Node",
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",
   "scripts": {
-    "lint": "eslint --fix src/*.js",
+    "lint": "eslint src --ext js --fix --cache",
+    "prelint:watch": "npm run lint",
+    "lint:watch": "onchange 'src/*.js' 'src/**/*.js' -- npm run lint",
     "test": "cross-env DEBUG=ciris:* babel-tape-runner ./src/**/*.spec.js | tap-summary",
     "coverage": "nyc  babel-tape-runner ./src/**/*.js | tap-nyc; nyc report --reporter=text-summary",
     "dev": "cross-env DEBUG=ciris:* nodemon -w src --exec \"npm run lint; babel-node src\"",
-    "build": "cross-env NODE_ENV=production npx rimraf dist; babel src -s -D -d dist --ignore *.spec.js"
+    "start": "npm-run-all --parallel lint:watch dev",
+    "build": "cross-env NODE_ENV=production npm run lint; rimraf dist; babel src -s -D -d dist --ignore *.spec.js"
   },
   "engines": {
     "node": "~8.9.x",
-    "npm": "~5.6.x",
+    "npm": "~5.7.x",
     "cpu": [
       "x64",
       "ia32"
@@ -25,6 +28,8 @@
     "body-parser": "1.18.2",
     "cors": "2.8.4",
     "debug": "3.1.0",
+    "eslint-plugin-lodash": "2.7.0",
+    "eslint-plugin-promise": "3.7.0",
     "express": "4.16.2",
     "jwt-simple": "0.5.1",
     "lodash": "4.17.4",

@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import D from "debug";
-import _ from "lodash";
+import flow from "lodash/flow";
+import size from "lodash/size";
+import invokeMap from "lodash/invokeMap";
 import entorno from "../entorno.js";
 import initDB from "./bd.js";
 import pkgJson from "../../package.json";
@@ -67,8 +69,8 @@ function rutasBase(appRu) {
 function procesarOrigenes(string) {
   debug(`Configurando los origenes ${string}`);
   const res = string.split(",");
-  if (_.size(res) === 1) {
+  if (size(res) === 1) {
     return string;
   }
-  return _.map(res, s => s.trim());
+  return invokeMap(res, "trim");
 }

@@ -1,6 +1,10 @@
 {
   "presets": ["env"],
   "env": {
+    "test": {
+      "presets": ["env"],
+      "plugins": ["istanbul"]
+    },
     "production": {
       "plugins": ["envify"],
       "presets": ["minify"]

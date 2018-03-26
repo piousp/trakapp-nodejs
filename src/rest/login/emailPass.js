@@ -12,9 +12,7 @@ function login(coleccion) {
   return (req, res) => {
     obtenerUsuario(coleccion, req.body.login)
       .then(usuarioBD => validarPassword(usuarioBD, req.body.password))
-      .then((resp) => {
-        res.send(resp);
-      })
+      .then(resp => res.send(resp))
       .catch((err) => {
         res.status(err.status).send(err.message);
       });
@@ -25,9 +23,7 @@ function registrar(coleccion) {
   return (req, res) => {
     existeUsuario(coleccion, req.body.correo)
       .then(() => crearUsuario(coleccion, req.body))
-      .then((resp) => {
-        res.send(resp);
-      })
+      .then(resp => res.send(resp))
       .catch((err) => {
         res.status(err.status).send(err.message);
       });
