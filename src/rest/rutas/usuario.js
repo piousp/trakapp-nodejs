@@ -19,7 +19,7 @@ function getID(req, res) {
 }
 
 function getBase(req, res) {
-  comun.find()
+  comun.find(null, req.query)
     .then(ok(res))
     .catch(error(res));
 }
