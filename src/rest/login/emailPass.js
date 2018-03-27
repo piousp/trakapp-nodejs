@@ -2,9 +2,11 @@ import express from "express";
 import mongoose from "mongoose";
 import { crearJWT } from "./middleware.js";
 import { modelo } from "../modelos/usuario.js";
+import { empleado } from "../modelos/empleado";
 
 const router = express.Router();
 
+router.post("/login/movil", login(empleado));
 router.post("/login", login(modelo));
 router.post("/registro", registrar(modelo));
 

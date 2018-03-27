@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { presave, comparePassword } from "./encriptador";
 
 const esquema = new mongoose.Schema({
   nombre: {
@@ -6,6 +7,15 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   apellidos: String,
+  correo: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  password: {
+    type: String,
+    default: "movil123",
+  },
   position: {
     lat: {
       type: Number,
@@ -20,6 +30,9 @@ const esquema = new mongoose.Schema({
     type: Boolean, default: false, select: false, index: true,
   },
 });
+
+esquema.pre("save", presave);
+esquema.methods.comparePassword = comparePassword;
 
 const empleado = mongoose.model("empleado", esquema);
 

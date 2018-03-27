@@ -1,17 +1,27 @@
 import express from "express";
 import isEmpty from "lodash/isEmpty";
-// import moment from "moment";
 import { tarea } from "../modelos/tarea.js";
 import { Comunes as Comun } from "../comun-db.js";
 
 const router = express.Router();
 const comun = new Comun(tarea);
 
+router.get("/empleado/:id", getTareasEmpleado);
 router.get("/:id", getID);
 router.get("/", getBase);
 router.put("/:id", putID);
 router.post("/", postBase);
 router.delete("/:id", deleteID);
+
+function getTareasEmpleado(req, res) {
+  const query = {
+    borrado: false,
+    empleado: req.params.id,
+  };
+  comun.find(query)
+    .then(ok(res))
+    .catch(error(res));
+}
 
 function getID(req, res) {
   comun.findOne(req.params.id)
