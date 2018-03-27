@@ -29,6 +29,7 @@ export default (io) => {
   }
 
   function postBase(req, res) {
+    req.body.password = "movil123";
     comun.create(req.body).then(ok(res), error(res));
   }
 

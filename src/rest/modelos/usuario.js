@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import { presave, comparePassword } from "./encriptador";
 
-const SALT_WORK_FACTOR = 10;
 const esquema = new mongoose.Schema({
   nombre: {
     type: String,
@@ -24,37 +23,8 @@ const esquema = new mongoose.Schema({
   },
 });
 
-function encriptar(usuario, next) {
-  bcrypt.genSalt(SALT_WORK_FACTOR, (err, salt) => {
-    if (err) {
-      return next(err);
-    }
-    return bcrypt.hash(usuario.password, salt, (err2, hash) => {
-      if (err2) {
-        return next(err2);
-      }
-      usuario.password = hash;
-      return next();
-    });
-  });
-}
-
-esquema.pre("save", function (next) { //eslint-disable-line
-  const usuario = this;
-  if (!usuario.isModified("password")) {
-    return next();
-  }
-  return encriptar(usuario, next);
-});
-
-esquema.methods.comparePassword = function comparePassword(inputPassword, callback) {
-  bcrypt.compare(inputPassword, this.password, (err, isMatch) => {
-    if (err) {
-      return callback(err);
-    }
-    return callback(null, isMatch);
-  });
-};
+esquema.pre("save", presave);
+esquema.methods.comparePassword = comparePassword;
 
 const modelo = mongoose.model("usuario", esquema);
 
