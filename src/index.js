@@ -6,6 +6,7 @@ import emailPass from "./rest/login/emailPass.js";
 import empleados from "./rest/rutas/empleado.js";
 import tareas from "./rest/rutas/tarea.js";
 import mensajes from "./rest/rutas/mensaje.js";
+import usuarios from "./rest/rutas/usuario.js";
 import entorno from "./entorno.js";
 
 import { modelo } from "./rest/modelos/usuario.js";
@@ -22,6 +23,7 @@ servidor((app) => {
   app.use("/api/empleado", empleados(socket));
   app.use("/api/tarea", tareas);
   app.use("/api/mensaje", mensajes);
+  app.use("/api/usuario", usuarios);
 
   revisarPorRoot();
 
