@@ -1,13 +1,13 @@
 import express from "express";
-import isEmpty from "lodash/isEmpty";
 import { mensaje } from "../modelos/mensaje.js";
-import { Comunes as Comun } from "../comun-db.js";
+import funDB from "../comun-db.js";
+import { postBase, ok, error } from "./_base";
 
 const router = express.Router();
-const comun = new Comun(mensaje);
+const comun = funDB(mensaje);
 
 router.get("/:receptor", getBase);
-router.post("/", postBase);
+postBase(router, mensaje);
 
 function getBase(req, res) {
   const query = {
@@ -24,23 +24,5 @@ function getBase(req, res) {
     .catch(error(res));
 }
 
-function postBase(req, res) {
-  comun.create(req.body)
-    .then(ok(res))
-    .catch(error(res));
-}
-
-function ok(res) {
-  return obj => res.json(obj);
-}
-
-function error(res) {
-  return (err) => {
-    if (isEmpty(err)) {
-      return res.status(200).send({});
-    }
-    return res.status(500).send(err);
-  };
-}
 
 export default router;

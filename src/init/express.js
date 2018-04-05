@@ -15,8 +15,8 @@ const origenes = procesarOrigenes(entorno.ORIGIN);
 
 export default function initApp(configRutas) {
   debug("Booteando...");
-  const pipe = flow([configurarCors, configurarBodyParse, configRutas, rutasBase]);
   initDB();
+  const pipe = flow([configurarCors, configurarBodyParse, configRutas, rutasBase]);
   return pipe(express());
 }
 
