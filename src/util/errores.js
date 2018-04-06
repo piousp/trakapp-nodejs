@@ -1,4 +1,4 @@
-export { ErrorMongo, NoExiste };
+export { ErrorMongo, NoExiste, UsuarioInvalido };
 
 
 function ErrorMongo(message) {
