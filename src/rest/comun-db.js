@@ -1,5 +1,4 @@
 import isEmpty from "lodash/isEmpty";
-import pify from "pify";
 import D from "debug";
 import curry from "lodash/curry";
 import { ErrorMongo, NoExiste } from "../util/errores";
@@ -18,7 +17,7 @@ export {
   deleteOne,
   deleteMany,
   efectuarCambio,
-  procesar,
+  agregarCatch,
   procesarBusqueda,
 };
 
@@ -46,8 +45,8 @@ function find(modelo, pquery, pagination, populate) {
     .limit(abs.cantidad)
     .populate(populate || "")
     .lean();
-  const objetos = pify(docs.exec).then(procesar("Error en la búsqueda"));
-  const conteo = pify(modelo.count)(query).then(procesar("Error en el conteo"));
+  const objetos = agregarCatch(docs.exec());
+  const conteo = agregarCatch(modelo.count(query).exec());
   return Promise.all([objetos, conteo])
     .then(valores => ({
       docs: valores[0],
@@ -62,7 +61,7 @@ function findOne(modelo, pid, pquery, populate) {
     .findOne(query)
     .populate(populate || "")
     .lean();
-  return procesarBusqueda(doc.exec);
+  return procesarBusqueda(doc.exec());
 }
 
 function findOneAndUpdate(modelo, pid, pbody, pquery, popciones) {
@@ -72,41 +71,36 @@ function findOneAndUpdate(modelo, pid, pbody, pquery, popciones) {
     multi: false, upsert: false, new: true, runValidators: true,
   };
   const doc = modelo.findOneAndUpdate(query, pbody, opciones).lean();
-  return procesarBusqueda(doc.exec);
+  return procesarBusqueda(doc.exec());
 }
 
 function create(modelo, body) {
   debug("Invocando create");
-  return pify(modelo.create)(body)
-    .then(procesar("Error insertando el obj"));
+  return agregarCatch(modelo.create(body));
 }
 
 function updateOne(modelo, pid, body) {
   debug("Invocando updateOne");
   const opciones = { multi: false, upsert: false };
-  return pify(modelo.update)({ _id: pid }, body, opciones)
-    .then(procesar("Error actualizando el obj"));
+  return agregarCatch(modelo.update({ _id: pid }, body, opciones));
 }
 
 function updateMany(modelo, pquery, body) {
   debug("Invocando updateMany");
   const opciones = { multi: true, upsert: false };
-  return pify(modelo.update)(pquery, body, opciones)
-    .then(procesar("Error actualizando los obj"));
+  return agregarCatch(modelo.update(pquery, body, opciones));
 }
 
 function deleteOne(modelo, pid) {
   debug("Invocando deleteOne");
   const opciones = { multi: false, upsert: false };
-  return pify(modelo.update)({ _id: pid }, { $set: { borrado: true } }, opciones)
-    .then(procesar("Error borrando lógicamente el obj"));
+  return agregarCatch(modelo.update({ _id: pid }, { $set: { borrado: true } }, opciones));
 }
 
 function deleteMany(modelo, pquery) {
   debug("Invocando deleteMany");
   const opciones = { multi: true, upsert: false };
-  return pify(modelo.update)(pquery, { $set: { borrado: true } }, opciones)
-    .then(procesar("Error borrando lógicamente los obj"));
+  return agregarCatch(modelo.update(pquery, { $set: { borrado: true } }, opciones));
 }
 
 function efectuarCambio(modelo, conteo, pid, pcambio, popciones, pquery) {
@@ -116,7 +110,7 @@ function efectuarCambio(modelo, conteo, pid, pcambio, popciones, pquery) {
     multi: false, upsert: false, new: true, runValidators: true,
   };
   const docs = modelo.findOneAndUpdate(query, pcambio, opciones).lean();
-  return procesarBusqueda(docs.exec);
+  return procesarBusqueda(docs.exec());
 }
 
 function skipLimitABS(query) {
@@ -128,26 +122,21 @@ function skipLimitABS(query) {
   };
 }
 
-function procesar(mensajeError) {
-  debug("Procesando solicitud de mongo");
-  return (err, resp) => {
-    debug("Resultados:" err, resp);
-    if (err) {
-      debug(mensajeError, err);
-      throw new ErrorMongo(`mensajeError: ${err}`);
-    }
-    return resp;
-  };
+function agregarCatch(promesa) {
+  return promesa.catch((err) => {
+    debug("Error procesando cmd mongo", err);
+    throw new ErrorMongo(`mensajeError: ${err}`);
+  });
 }
 
 function procesarBusqueda(query) {
   debug("Procesando búsqueda de mongo");
-  return pify(query)()
-    .then(procesar("Error en la búsqueda"))
+  const promesa = query
     .then((resp) => {
       if (isEmpty(resp)) {
         throw new NoExiste();
       }
       return resp;
     });
+  return agregarCatch(promesa);
 }

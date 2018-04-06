@@ -9,7 +9,7 @@ export default revisarPorRoot;
 
 function revisarPorRoot() {
   debug("Revisando por Root...");
-  return comun.findOne(null, { correo: "root" }, null)
+  return comun.findOne(null, { correo: "root" }, undefined)
     .then(() => debug("Root encontrado!"))
     .catch(() => {
       debug("Root no encontrado, creando...");
@@ -20,6 +20,5 @@ function revisarPorRoot() {
       };
       return comun.create(usuarioRoot);
     })
-    .then(() => debug("Root creado!"))
-    .catch(err => debug("Alggo pasó", err));
+    .catch(err => debug("Algo pasó", err));
 }
