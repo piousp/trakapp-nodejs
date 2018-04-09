@@ -1,6 +1,7 @@
 import D from "debug";
 import mongoose from "mongoose";
 import entorno from "../entorno.js";
+import revisarPorRoot from "./usuarioRoot.js";
 
 const debug = D("ciris:init/bd.js");
 export default initDB;
@@ -15,6 +16,7 @@ function initDB() {
   });
   db.once("open", () => {
     debug("Conexión establecida");
+    revisarPorRoot();
   });
   return db;
 }
