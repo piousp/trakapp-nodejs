@@ -1,7 +1,7 @@
 import express from "express";
 import { empleado } from "../modelos/empleado.js";
 import funDB from "../comun-db.js";
-import { getID, getBase, ok, error } from "./_base";
+import { getID, getBase, deleteID, ok, error } from "./_base";
 
 export default (io) => {
   const router = express.Router();
@@ -9,6 +9,8 @@ export default (io) => {
 
   getID(router, empleado);
   getBase(router, empleado);
+  deleteID(router, empleado);
+
   router.put("/:id", putID);
   router.post("/", postBase);
 

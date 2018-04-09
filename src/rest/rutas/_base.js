@@ -1,5 +1,8 @@
 import isEmpty from "lodash/isEmpty";
+import D from "debug";
 import funDB from "../comun-db.js";
+
+const debug = D("ciris:rest/rutas/_base.js");
 
 export default rutasGenericas;
 export {
@@ -13,6 +16,7 @@ export {
 };
 
 function getID(router, modelo) {
+  debug("getID");
   const comun = funDB(modelo);
   function getIDInterno(req, res) {
     comun.findOne(req.params.id)
@@ -24,6 +28,7 @@ function getID(router, modelo) {
 }
 
 function getBase(router, modelo) {
+  debug("getBase");
   const comun = funDB(modelo);
   function getBaseInterno(req, res) {
     comun.find(null, req.query)
@@ -34,6 +39,7 @@ function getBase(router, modelo) {
   return router;
 }
 function putID(router, modelo) {
+  debug("putID");
   const comun = funDB(modelo);
   function putIDInterno(req, res) {
     comun.findOneAndUpdate(req.params.id, req.body)
@@ -46,6 +52,7 @@ function putID(router, modelo) {
 
 
 function postBase(router, modelo) {
+  debug("postBase");
   const comun = funDB(modelo);
   function postBaseInterno(req, res) {
     comun.create(req.body)
@@ -57,9 +64,10 @@ function postBase(router, modelo) {
 }
 
 function deleteID(router, modelo) {
+  debug("deleteID");
   const comun = funDB(modelo);
   function deleteIDInterno(req, res) {
-    comun.delete(req.params.id)
+    comun.deleteOne(req.params.id)
       .then(ok(res))
       .catch(error(res));
   }
@@ -69,6 +77,7 @@ function deleteID(router, modelo) {
 
 
 function rutasGenericas(router, modelo) {
+  debug("Registrando todas las rutas genéricas");
   const rtg = getID(router, modelo);
   const rtbase = getBase(rtg, modelo);
   const rtput = putID(rtbase, modelo);
