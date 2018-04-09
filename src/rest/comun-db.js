@@ -1,139 +1,119 @@
 import isEmpty from "lodash/isEmpty";
 import D from "debug";
+import curry from "lodash/curry";
+import { ErrorMongo, NoExiste } from "../util/errores";
 
-const debug = D("ciris:commons/db.js");
+const debug = D("ciris:rest/comun-db.js");
 
+export default funDB;
 
-export { Comunes, skipLimitABS };
+export {
+  find,
+  findOne,
+  findOneAndUpdate,
+  create,
+  updateOne,
+  updateMany,
+  deleteOne,
+  deleteMany,
+  efectuarCambio,
+  agregarCatch,
+  procesarBusqueda,
+};
 
-function Comunes(modelo) {
-  this.modelo = modelo;
+function funDB(modelo) {
+  const obj = {};
+  obj.find = curry(find, 2)(modelo);
+  obj.findOne = curry(findOne, 2)(modelo);
+  obj.findOneAndUpdate = curry(findOneAndUpdate, 3)(modelo);
+  obj.create = curry(create)(modelo);
+  obj.updateOne = curry(updateOne)(modelo);
+  obj.updateMany = curry(updateMany)(modelo);
+  obj.deleteOne = curry(deleteOne)(modelo);
+  obj.deleteMany = curry(deleteMany)(modelo);
+  obj.efectuarCambio = curry(efectuarCambio, 3)(modelo);
+  return obj;
 }
 
-Comunes.prototype.findOne = findOne;
-Comunes.prototype.find = find;
-Comunes.prototype.findOneAndUpdate = findOneAndUpdate;
-Comunes.prototype.create = create;
-Comunes.prototype.delete = deleteOne;
-Comunes.prototype.efectuarCambio = efectuarCambio;
-
-function find(pquery, pagination, populate) {
+async function find(modelo, pquery, pagination, populate) {
   debug("find");
-  const este = this;
   const query = pquery || { borrado: false };
   const abs = skipLimitABS(pagination || {});
-  return new Promise(((resolve, reject) => {
-    const docs = este.modelo
-      .find(query, { password: 0 })
-      .skip(abs.total)
-      .limit(abs.cantidad)
-      .populate(populate || "")
-      .lean();
-    docs.exec((err, resp) => {
-      debug("Ejecuté el query");
-      if (err) {
-        debug("Algo pasó", err);
-        reject(err);
-      }
-      este.modelo.count(query, (err2, cant) => {
-        debug("Contando objetos");
-        if (err2) {
-          debug("Algo pasó contando objetos", err2);
-          reject(err2);
-        }
-        debug("Busqueda éxitosa");
-        resolve({
-          docs: resp,
-          cant,
-        });
-      });
-    });
-  }));
+  const docs = modelo
+    .find(query, { password: 0 })
+    .skip(abs.total)
+    .limit(abs.cantidad)
+    .populate(populate || "")
+    .lean();
+  try {
+    const objetos = await docs.exec();
+    const conteo = await modelo.count(query).exec();
+    return {
+      docs: objetos,
+      cant: conteo,
+    };
+  } catch (err) {
+    throw new ErrorMongo(`mensajeError: ${err}`);
+  }
 }
 
-function findOne(pid, pquery, populate) {
-  const este = this;
+async function findOne(modelo, pid, pquery, populate) {
+  debug("Invocando findOne con los siguientes params:", pid, pquery, populate);
   const query = pquery || { _id: pid, borrado: false };
-  return new Promise(((resolve, reject) => {
-    este.modelo.findOne(query, (err, obj) => {
-      if (err) {
-        reject(err);
-      }
-      if (isEmpty(obj)) {
-        reject("No existe");
-      }
-      resolve(obj);
-    }).lean()
-      .populate(populate || "");
-  }));
+  const doc = modelo
+    .findOne(query)
+    .populate(populate || "")
+    .lean();
+  return procesarBusqueda(doc.exec());
 }
 
-function findOneAndUpdate(pid, pbody, pquery, popciones) {
-  const este = this;
+async function findOneAndUpdate(modelo, pid, pbody, pquery, popciones) {
+  debug("Invocando findOneAndUpdate con los siguientes params:", pid, pbody, pquery, popciones);
   const query = pquery || { _id: pid, borrado: false };
   const opciones = popciones || {
     multi: false, upsert: false, new: true, runValidators: true,
   };
-  return new Promise(((resolve, reject) => {
-    este.modelo.findOneAndUpdate(query, pbody, opciones)
-      .lean()
-      .exec((err, obj) => {
-        if (err) {
-          reject(err);
-        }
-        if (isEmpty(obj)) {
-          reject("No existe");
-        }
-        resolve(obj);
-      });
-  }));
+  const doc = modelo.findOneAndUpdate(query, pbody, opciones).lean();
+  return procesarBusqueda(doc.exec());
 }
 
-function create(body) {
-  const este = this;
-  return new Promise(((resolve, reject) => {
-    este.modelo.create(body, (err, obj) => {
-      if (err) {
-        debug("Error creando");
-        return reject(err);
-      }
-      debug("Objeto creando");
-      return resolve(obj);
-    });
-  }));
+async function create(modelo, body) {
+  debug("Invocando create");
+  return agregarCatch(modelo.create(body));
 }
 
-function deleteOne(pid) {
-  const este = this;
-  return new Promise(((resolve, reject) => {
-    este.modelo.delete({ _id: pid }, (err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve();
-    });
-  }));
+async function updateOne(modelo, pid, body) {
+  debug("Invocando updateOne");
+  const opciones = { multi: false, upsert: false };
+  return agregarCatch(modelo.update({ _id: pid }, body, opciones));
 }
 
-function efectuarCambio(pid, pcambio, popciones, pquery) {
-  const este = this;
+async function updateMany(modelo, pquery, body) {
+  debug("Invocando updateMany");
+  const opciones = { multi: true, upsert: false };
+  return agregarCatch(modelo.update(pquery, body, opciones));
+}
+
+async function deleteOne(modelo, pid) {
+  debug("Invocando deleteOne");
+  const opciones = { multi: false, upsert: false };
+  return agregarCatch(modelo.update({ _id: pid }, { $set: { borrado: true } }, opciones));
+}
+
+async function deleteMany(modelo, pquery) {
+  debug("Invocando deleteMany");
+  const opciones = { multi: true, upsert: false };
+  return agregarCatch(modelo.update(pquery, { $set: { borrado: true } }, opciones));
+}
+
+async function efectuarCambio(modelo, pid, pcambio, popciones, pquery) {
+  debug("Invocando efectuarCambio");
   const query = pid ? { _id: pid, borrado: false } : pquery;
   const opciones = popciones || {
     multi: false, upsert: false, new: true, runValidators: true,
   };
-  return new Promise(((resolve, reject) => {
-    este.modelo.findOneAndUpdate(query, pcambio, opciones)
-      .lean()
-      .exec((err, obj) => {
-        if (err) {
-          reject(err);
-        }
-        if (isEmpty(obj)) {
-          reject("No existe");
-        }
-        resolve(obj);
-      });
-  }));
+  const docs = modelo.findOneAndUpdate(query, pcambio, opciones).lean();
+  return procesarBusqueda(docs.exec());
 }
 
 function skipLimitABS(query) {
@@ -143,4 +123,26 @@ function skipLimitABS(query) {
     cantidad,
     total,
   };
+}
+
+async function agregarCatch(promesa) {
+  try {
+    return await promesa;
+  } catch (err) {
+    debug("Error procesando cmd mongo", err);
+    throw new ErrorMongo(`mensajeError: ${err}`);
+  }
+}
+
+async function procesarBusqueda(query) {
+  debug("Procesando búsqueda de mongo");
+  try {
+    const resp = await query;
+    if (isEmpty(resp)) {
+      throw new NoExiste();
+    }
+    return resp;
+  } catch (err) {
+    throw new ErrorMongo(`mensajeError: ${err}`);
+  }
 }

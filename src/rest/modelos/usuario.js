@@ -58,4 +58,5 @@ esquema.methods.comparePassword = function comparePassword(inputPassword, callba
 
 const modelo = mongoose.model("usuario", esquema);
 
-export { esquema, modelo };
+export { esquema };
+export default modelo;
