@@ -1,5 +1,5 @@
 import express from "express";
-import { empleado } from "../modelos/empleado.js";
+import empleado from "../modelos/empleado.js";
 import funDB from "../comun-db.js";
 import { getID, getBase, deleteID, ok, error } from "./_base";
 

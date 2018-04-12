@@ -67,7 +67,7 @@ async function findOne(modelo, pid, pquery, populate) {
   return procesarBusqueda(doc.exec());
 }
 
-async function findOneAndUpdate(modelo, pid, pbody, pquery, popciones) {
+function findOneAndUpdate(modelo, pid, pbody, pquery, popciones) {
   debug("Invocando findOneAndUpdate con los siguientes params:", pid, pbody, pquery, popciones);
   const query = pquery || { _id: pid, borrado: false };
   const opciones = popciones || {

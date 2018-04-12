@@ -1,5 +1,5 @@
 import D from "debug";
-import { modelo } from "../rest/modelos/usuario.js";
+import modelo from "../rest/modelos/usuario.js";
 import funDB from "../rest/comun-db.js";
 
 const debug = D("ciris:init/usuarioRoot.js");

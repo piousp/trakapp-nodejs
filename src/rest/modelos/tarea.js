@@ -19,6 +19,7 @@ const esquema = new mongoose.Schema({
   },
 });
 
-const tarea = mongoose.model("tarea", esquema);
+const modelo = mongoose.model("tarea", esquema);
 
-export { esquema, tarea };
+export { esquema };
+export default modelo;

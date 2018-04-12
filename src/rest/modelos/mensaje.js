@@ -24,6 +24,7 @@ const esquema = new mongoose.Schema({
   },
 });
 
-const mensaje = mongoose.model("mensaje", esquema);
+const modelo = mongoose.model("mensaje", esquema);
 
-export { esquema, mensaje };
+export { esquema };
+export default modelo;

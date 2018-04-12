@@ -1,5 +1,5 @@
 import express from "express";
-import { mensaje } from "../modelos/mensaje.js";
+import mensaje from "../modelos/mensaje.js";
 import funDB from "../comun-db.js";
 import { postBase, ok, error } from "./_base";
 
