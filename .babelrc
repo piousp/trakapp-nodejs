@@ -1,9 +1,5 @@
 {
-  "presets": ["env"
-    {
-      "modules": false,
-      "cacheDirectory": true
-    }],
+  "presets": ["env"],
   "env": {
     "test": {
       "presets": ["env"],
