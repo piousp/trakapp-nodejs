@@ -25,6 +25,7 @@ const esquema = new mongoose.Schema({
       type: Number,
       default: 0.0,
     },
+    lastUpdate: Date,
   },
   borrado: {
     type: Boolean, default: false, select: false, index: true,
@@ -34,6 +35,6 @@ const esquema = new mongoose.Schema({
 esquema.pre("save", presave);
 esquema.methods.comparePassword = comparePassword;
 
-const empleado = mongoose.model("empleado", esquema);
+const mEmpleado = mongoose.model("empleado", esquema);
 
-export { esquema, empleado };
+export { esquema, mEmpleado };
