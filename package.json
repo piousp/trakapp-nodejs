@@ -36,7 +36,6 @@
     "moment": "2.20.1",
     "mongoose": "5.0.13",
     "mongoose-auto-increment": "5.0.1",
-    "pify": "3.0.0",
     "socket.io": "2.0.4",
     "tape": "4.8.0"
   },
