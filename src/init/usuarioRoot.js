@@ -15,7 +15,7 @@ function revisarPorRoot() {
       debug("Root no encontrado, creando...");
       const usuarioRoot = {
         correo: "root",
-        password: "cirisCiris.93",
+        password: "rastreadorRootCiris",
         nombre: "root",
       };
       return comun.create(usuarioRoot);
