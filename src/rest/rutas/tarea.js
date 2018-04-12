@@ -1,17 +1,17 @@
 import express from "express";
-import isEmpty from "lodash/isEmpty";
 import { tarea } from "../modelos/tarea.js";
-import { Comunes as Comun } from "../comun-db.js";
+import funDB from "../comun-db.js";
+import { getID, putID, postBase, deleteID, ok, error } from "./_base";
 
 const router = express.Router();
-const comun = new Comun(tarea);
+const comun = funDB(tarea);
 
 router.get("/empleado/:id", getTareasEmpleado);
-router.get("/:id", getID);
+getID(router, tarea);
 router.get("/", getBase);
-router.put("/:id", putID);
-router.post("/", postBase);
-router.delete("/:id", deleteID);
+putID(router, tarea);
+postBase(router, tarea);
+deleteID(router, tarea);
 
 function getTareasEmpleado(req, res) {
   const query = {
@@ -23,11 +23,6 @@ function getTareasEmpleado(req, res) {
     .catch(error(res));
 }
 
-function getID(req, res) {
-  comun.findOne(req.params.id)
-    .then(ok(res))
-    .catch(error(res));
-}
 
 function getBase(req, res) {
   const query = {
@@ -40,37 +35,6 @@ function getBase(req, res) {
   comun.find(query)
     .then(ok(res))
     .catch(error(res));
-}
-
-function putID(req, res) {
-  comun.findOneAndUpdate(req.params.id, req.body)
-    .then(ok(res))
-    .catch(error(res));
-}
-
-function postBase(req, res) {
-  comun.create(req.body)
-    .then(ok(res))
-    .catch(error(res));
-}
-
-function deleteID(req, res) {
-  comun.delete(req.params.id)
-    .then(ok(res))
-    .catch(error(res));
-}
-
-function ok(res) {
-  return obj => res.json(obj);
-}
-
-function error(res) {
-  return (err) => {
-    if (isEmpty(err)) {
-      return res.status(200).send({});
-    }
-    return res.status(500).send(err);
-  };
 }
 
 export default router;

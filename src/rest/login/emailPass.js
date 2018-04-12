@@ -1,9 +1,15 @@
 import express from "express";
 import mongoose from "mongoose";
+import pify from "pify";
+import D from "debug";
+import constant from "lodash/constant";
 import { crearJWT } from "./middleware.js";
 import { modelo } from "../modelos/usuario.js";
 import { empleado } from "../modelos/empleado";
+import { procesarBusqueda } from "../comun-db";
+import { ErrorMongo, UsuarioInvalido } from "../../util/errores";
 
+const debug = D("ciris:rest/login/emailPass.js");
 const router = express.Router();
 
 router.post("/login/movil", login(empleado));
@@ -33,70 +39,44 @@ function registrar(coleccion) {
 }
 
 function obtenerUsuario(coleccion, correo) {
-  return new Promise((resolve, reject) => {
-    coleccion.findOne({
-      correo,
-      borrado: false,
-    }, (errFind, encontrado) => {
-      if (errFind) {
-        reject({ message: errFind.message, status: 500 });
-      }
-      if (!encontrado) {
-        reject({ message: "Usuario no encontrado", status: 401 });
-      }
-      resolve(encontrado);
-    });
-  });
+  const docs = coleccion.findOne({ correo, borrado: false });
+  return procesarBusqueda(docs.exec);
 }
 
 function validarPassword(encontrado, password) {
-  return new Promise((resolve, reject) => {
-    encontrado.comparePassword(password, (errMatch, isMatch) => {
-      if (errMatch) {
-        return reject({ message: errMatch.message, status: 500 });
-      }
-      if (!isMatch) {
-        return reject({ message: "Correo o password inválido", status: 401 });
-      }
-      const token = crearJWT(encontrado);
-      const temp = encontrado.toJSON();
-      delete temp.password;
-      return resolve({ usuario: temp, token });
-    });
+  return pify(encontrado.comparePassword)(password).then((errMatch, isMatch) => {
+    if (errMatch) {
+      debug(errMatch);
+      throw new ErrorMongo(`mensajeError: ${errMatch}`);
+    }
+    if (!isMatch) {
+      throw new UsuarioInvalido();
+    }
+    const token = crearJWT(encontrado);
+    const temp = encontrado.toJSON();
+    delete temp.password;
+    return { usuario: temp, token };
   });
 }
 
 function crearUsuario(Coleccion, data) {
-  return new Promise(((resolve, reject) => {
-    const nuevo = new Coleccion(data);
-    nuevo._id = new mongoose.Types.ObjectId();
-    nuevo.save(data, (errSave, result) => {
-      if (errSave) {
-        return reject({ message: errSave.message, status: 500 });
-      }
-      const token = crearJWT(result);
-      const temp = result.toJSON();
-      delete temp.password;
-      return resolve({ usuario: temp, token });
-    });
-  }));
+  const nuevo = new Coleccion(data);
+  nuevo._id = new mongoose.Types.ObjectId();
+  return pify(nuevo.save)(data).then((errSave, result) => {
+    if (errSave) {
+      debug(errSave);
+      throw new ErrorMongo(`mensajeError: ${errSave}`);
+    }
+    const token = crearJWT(result);
+    const temp = result.toJSON();
+    delete temp.password;
+    return { usuario: temp, token };
+  });
 }
 
 function existeUsuario(coleccion, correo) {
-  return new Promise(((resolve, reject) => {
-    coleccion.findOne({
-      correo,
-      borrado: false,
-    }, (errFind, encontrado) => {
-      if (errFind) {
-        return reject({ message: errFind.message, status: 500 });
-      }
-      if (encontrado) {
-        return reject({ message: "El correo ya existe", status: 409 });
-      }
-      return resolve(true);
-    });
-  }));
+  const docs = coleccion.findOne({ correo, borrado: false });
+  return procesarBusqueda(docs.exec).then(constant(true));
 }
 
 export default router;

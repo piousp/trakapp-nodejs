@@ -34,6 +34,7 @@ const esquema = new mongoose.Schema({
 esquema.pre("save", presave);
 esquema.methods.comparePassword = comparePassword;
 
-const empleado = mongoose.model("empleado", esquema);
+const modelo = mongoose.model("empleado", esquema);
 
-export { esquema, empleado };
+export { esquema };
+export default modelo;
