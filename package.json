@@ -1,6 +1,6 @@
 {
   "name": "nodejs-backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Proyecto base para el backend realizado con Node",
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",
