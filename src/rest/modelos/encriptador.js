@@ -1,14 +1,22 @@
 import bcrypt from "bcrypt";
+import util from "util";
+import D from "debug";
+
+const debug = D("ciris:modelos/encriptador.js");
 
 const SALT_WORK_FACTOR = 10;
 
-function comparePassword(inputPassword, callback) {
-  bcrypt.compare(inputPassword, this.password, (err, isMatch) => {
-    if (err) {
-      return callback(err);
-    }
-    return callback(null, isMatch);
-  });
+async function comparePassword(inputPassword) {
+  try {
+    const passwd = this.password;
+    debug("Comparando los passwords", inputPassword, passwd);
+    const isMatch = await util.promisify(bcrypt.compare)(inputPassword, passwd);
+    debug("resultado comparación passwds", isMatch);
+    return isMatch;
+  } catch (err) {
+    debug(err);
+    return false;
+  }
 }
 
 function encriptar(modelo, next) {
