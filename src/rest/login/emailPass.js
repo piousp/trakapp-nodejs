@@ -1,7 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
 import D from "debug";
-import constant from "lodash/constant";
 import { crearJWT } from "./middleware.js";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloEmpleado from "../modelos/empleado";
@@ -20,29 +19,53 @@ function login(coleccion) {
     try {
       debug("Realizando la acción de login");
       const usuario = await obtenerUsuario(coleccion, req.body.login);
-      debug("Usuario obtenido");
-      const token = await validarPassword(usuario, req.body.password);
-      debug(token);
-      res.send(token);
+      if (usuario) {
+        debug("Usuario obtenido");
+        const token = await validarPassword(usuario, req.body.password);
+        debug(token);
+        return res.send(token);
+      }
+      return res.status(400).send("Credenciales inválidos");
     } catch (err) {
       debug(err);
-      res.status(503).send(err.message);
+      if (err instanceof UsuarioInvalido) {
+        return res.status(400).send(err.message);
+      }
+      if (err instanceof ErrorMongo) {
+        return res.status(500).send(err.message);
+      }
+      return res.status(503).send(err.message);
     }
   };
 }
 
 function registrar(coleccion) {
-  return (req, res) => {
-    existeUsuario(coleccion, req.body.correo)
-      .then(() => crearUsuario(coleccion, req.body))
-      .then(resp => res.send(resp))
-      .catch((err) => {
-        res.status(503).send(err.message);
-      });
+  return async (req, res) => {
+    try {
+      debug("Realizando la acción de registrar");
+      const existe = await existeUsuario(coleccion, req.body.correo);
+      debug("Usuario existe: ", existe);
+      if (existe) {
+        return res.status(409).send("El usuario ya existe");
+      }
+      const usuario = await crearUsuario(coleccion, req.body);
+      debug("Usuario creado");
+      return res.send(usuario);
+    } catch (err) {
+      debug(err);
+      if (err instanceof UsuarioInvalido) {
+        return res.status(400).send(err.message);
+      }
+      if (err instanceof ErrorMongo) {
+        return res.status(500).send(err.message);
+      }
+      return res.status(503).send(err.message);
+    }
   };
 }
 
 function obtenerUsuario(coleccion, correo) {
+  debug("obtenerUsuario", correo);
   const docs = coleccion.findOne({ correo, borrado: false });
   return procesarBusqueda(docs.exec());
 }
@@ -66,6 +89,7 @@ async function validarPassword(usuario, password) {
 
 async function crearUsuario(Coleccion, data) {
   try {
+    debug("Creando usuario");
     const nuevo = new Coleccion(data);
     nuevo._id = new mongoose.Types.ObjectId();
     const resultadoGuardar = await nuevo.save(data);
@@ -79,9 +103,10 @@ async function crearUsuario(Coleccion, data) {
   }
 }
 
-function existeUsuario(coleccion, correo) {
+async function existeUsuario(coleccion, correo) {
   const docs = coleccion.findOne({ correo, borrado: false });
-  return procesarBusqueda(docs.exec).then(constant(true));
+  const busqueda = await procesarBusqueda(docs.exec());
+  return busqueda !== null;
 }
 
 export default router;

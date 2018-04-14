@@ -1,7 +1,7 @@
 import isEmpty from "lodash/isEmpty";
 import D from "debug";
 import curry from "lodash/curry";
-import { ErrorMongo, NoExiste } from "../util/errores";
+import { ErrorMongo } from "../util/errores";
 
 const debug = D("ciris:rest/comun-db.js");
 
@@ -138,11 +138,14 @@ async function procesarBusqueda(query) {
   debug("Procesando búsqueda de mongo");
   try {
     const resp = await query;
+    debug(resp);
     if (isEmpty(resp)) {
-      throw new NoExiste();
+      debug("Búsqueda vacía");
+      return null;
     }
     return resp;
   } catch (err) {
+    debug(err);
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }

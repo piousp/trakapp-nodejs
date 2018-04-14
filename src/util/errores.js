@@ -1,4 +1,4 @@
-export { ErrorMongo, NoExiste, UsuarioInvalido };
+export { ErrorMongo, UsuarioInvalido };
 
 
 function ErrorMongo(message) {
@@ -8,15 +8,6 @@ function ErrorMongo(message) {
 }
 ErrorMongo.prototype = Object.create(Error.prototype);
 ErrorMongo.prototype.constructor = ErrorMongo;
-
-/** ******************************************************************************** */
-function NoExiste(message) {
-  this.name = "NoExiste";
-  this.message = message || "El documento solicitado no existe";
-  this.stack = (new Error()).stack;
-}
-NoExiste.prototype = Object.create(Error.prototype);
-NoExiste.prototype.constructor = NoExiste;
 
 /** ******************************************************************************** */
 function UsuarioInvalido(message) {
