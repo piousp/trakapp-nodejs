@@ -26,6 +26,10 @@ const esquema = new mongoose.Schema({
       default: 0.0,
     },
   },
+  cliente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "usuario",
+  },
   borrado: {
     type: Boolean, default: false, select: false, index: true,
   },
