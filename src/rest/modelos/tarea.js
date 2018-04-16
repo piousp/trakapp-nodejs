@@ -1,21 +1,36 @@
+import "mongoose-geojson-schema";
 import mongoose from "mongoose";
 
 const esquema = new mongoose.Schema({
   title: {
-    type: String, required: true,
-  },
-  start: {
-    type: Date, required: true,
-  },
-  end: {
-    type: Date, required: true,
-  },
-  empleado: {
-    type: mongoose.Schema.Types.ObjectId, ref: "empleado",
+    type: String,
+    required: true,
   },
   descripcion: String,
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+  ubicacion: {
+    type: mongoose.Schema.Types.Point,
+  },
+  empleado: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "empleado",
+  },
+  cliente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "cliente",
+  },
   borrado: {
-    type: Boolean, default: false, select: false, index: true,
+    type: Boolean,
+    default: false,
+    select: false,
+    index: true,
   },
 });
 
