@@ -11,6 +11,7 @@ export {
   count,
   find,
   findOne,
+  findOneFat,
   findOneAndUpdate,
   create,
   updateOne,
@@ -27,6 +28,7 @@ function funDB(modelo) {
   obj.count = curry(count)(modelo);
   obj.find = curry(find, 2)(modelo);
   obj.findOne = curry(findOne, 2)(modelo);
+  obj.findOneFat = curry(findOneFat, 2)(modelo);
   obj.findOneAndUpdate = curry(findOneAndUpdate, 3)(modelo);
   obj.create = curry(create)(modelo);
   obj.updateOne = curry(updateOne)(modelo);
@@ -59,20 +61,29 @@ async function find(modelo, pquery, pagination, populate) {
   }
 }
 
-async function count(modelo, pquery) {
+function count(modelo, pquery) {
   debug("Invocando count con los siguientes params:", pquery);
   const query = pquery || { borrado: false };
   const doc = modelo.count(query);
   return agregarCatch(doc.exec());
 }
 
-async function findOne(modelo, pid, pquery, populate) {
+function findOne(modelo, pid, pquery, populate) {
   debug("Invocando findOne con los siguientes params:", pid, pquery, populate);
   const query = pquery || { _id: pid, borrado: false };
   const doc = modelo
     .findOne(query)
     .populate(populate || "")
     .lean();
+  return procesarBusqueda(doc.exec());
+}
+
+function findOneFat(modelo, pid, pquery, populate) {
+  debug("Invocando findOne con los siguientes params:", pid, pquery, populate);
+  const query = pquery || { _id: pid, borrado: false };
+  const doc = modelo
+    .findOne(query)
+    .populate(populate || "");
   return procesarBusqueda(doc.exec());
 }
 

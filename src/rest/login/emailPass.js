@@ -18,7 +18,8 @@ function login(coleccion) {
   return async (req, res) => {
     try {
       debug("Realizando la acción de login");
-      const usuario = await funBD(coleccion).findOne({ correo: req.body.login, borrado: false });
+      const usuario = await funBD(coleccion)
+        .findOneFat(null, { correo: req.body.login, borrado: false });
       if (usuario) {
         debug("Usuario obtenido");
         const token = await validarPassword(usuario, req.body.password);
@@ -65,7 +66,7 @@ async function registrar(req, res) {
 
 async function validarPassword(usuario, password) {
   try {
-    debug("Usuario encontrado, comparando el passwd");
+    debug("Usuario encontrado, comparando el passwd", usuario);
     const passwdValido = await usuario.comparePassword(password);
     if (passwdValido) {
       const token = crearJWT(usuario);
