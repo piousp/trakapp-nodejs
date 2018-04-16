@@ -8,6 +8,7 @@ const debug = D("ciris:rest/comun-db.js");
 export default funDB;
 
 export {
+  count,
   find,
   findOne,
   findOneAndUpdate,
@@ -23,6 +24,7 @@ export {
 
 function funDB(modelo) {
   const obj = {};
+  obj.count = curry(count)(modelo);
   obj.find = curry(find, 2)(modelo);
   obj.findOne = curry(findOne, 2)(modelo);
   obj.findOneAndUpdate = curry(findOneAndUpdate, 3)(modelo);
@@ -55,6 +57,13 @@ async function find(modelo, pquery, pagination, populate) {
   } catch (err) {
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
+}
+
+async function count(modelo, pquery) {
+  debug("Invocando count con los siguientes params:", pquery);
+  const query = pquery || { borrado: false };
+  const doc = modelo.count(query);
+  return agregarCatch(doc.exec());
 }
 
 async function findOne(modelo, pid, pquery, populate) {

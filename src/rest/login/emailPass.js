@@ -1,24 +1,24 @@
 import express from "express";
-import mongoose from "mongoose";
 import D from "debug";
 import { crearJWT } from "./middleware.js";
 import modeloUsuario from "../modelos/usuario.js";
-import modeloEmpleado from "../modelos/empleado";
-import { procesarBusqueda } from "../comun-db";
-import { ErrorMongo, UsuarioInvalido } from "../../util/errores";
+import modeloEmpleado from "../modelos/empleado.js";
+import modeloCliente from "../modelos/cliente.js";
+import funBD from "../comun-db.js";
+import { ErrorMongo, UsuarioInvalido } from "../../util/errores.js";
 
 const debug = D("ciris:rest/login/emailPass.js");
 const router = express.Router();
 
 router.post("/login/movil", login(modeloEmpleado));
 router.post("/login", login(modeloUsuario));
-router.post("/registro", registrar(modeloUsuario));
+router.post("/registro", registrar);
 
 function login(coleccion) {
   return async (req, res) => {
     try {
       debug("Realizando la acción de login");
-      const usuario = await obtenerUsuario(coleccion, req.body.login);
+      const usuario = await funBD(coleccion).findOne({ correo: req.body.login, borrado: false });
       if (usuario) {
         debug("Usuario obtenido");
         const token = await validarPassword(usuario, req.body.password);
@@ -39,35 +39,28 @@ function login(coleccion) {
   };
 }
 
-function registrar(coleccion) {
-  return async (req, res) => {
-    try {
-      debug("Realizando la acción de registrar");
-      const existe = await existeUsuario(coleccion, req.body.correo);
-      debug("Usuario existe: ", existe);
-      if (existe) {
-        return res.status(409).send("El usuario ya existe");
-      }
-      const usuario = await crearUsuario(coleccion, req.body);
-      debug("Usuario creado");
-      return res.send(usuario);
-    } catch (err) {
-      debug(err);
-      if (err instanceof UsuarioInvalido) {
-        return res.status(400).send(err.message);
-      }
-      if (err instanceof ErrorMongo) {
-        return res.status(500).send(err.message);
-      }
-      return res.status(503).send(err.message);
+async function registrar(req, res) {
+  try {
+    debug("Realizando la acción de registrar");
+    const existe = await existeUsuario(req.body.correo);
+    debug("Usuario existe: ", existe);
+    if (existe) {
+      return res.status(409).send("El usuario ya existe");
     }
-  };
-}
-
-function obtenerUsuario(coleccion, correo) {
-  debug("obtenerUsuario", correo);
-  const docs = coleccion.findOne({ correo, borrado: false });
-  return procesarBusqueda(docs.exec());
+    const cliente = await crearCliente(req.body);
+    const usuario = await crearUsuario(req.body, cliente._id);
+    debug("Usuario creado");
+    return res.send(usuario);
+  } catch (err) {
+    debug(err);
+    if (err instanceof UsuarioInvalido) {
+      return res.status(400).send(err.message);
+    }
+    if (err instanceof ErrorMongo) {
+      return res.status(500).send(err.message);
+    }
+    return res.status(503).send(err.message);
+  }
 }
 
 async function validarPassword(usuario, password) {
@@ -87,26 +80,45 @@ async function validarPassword(usuario, password) {
   }
 }
 
-async function crearUsuario(Coleccion, data) {
-  try {
-    debug("Creando usuario");
-    const nuevo = new Coleccion(data);
-    nuevo._id = new mongoose.Types.ObjectId();
-    const resultadoGuardar = await nuevo.save(data);
-    const token = crearJWT(resultadoGuardar);
-    const temp = resultadoGuardar.toJSON();
-    delete temp.password;
-    return { usuario: temp, token };
-  } catch (errSave) {
-    debug(errSave);
-    throw new ErrorMongo(`mensajeError: ${errSave}`);
-  }
+async function crearUsuario(data, idCliente) {
+  const bd = funBD(modeloUsuario);
+  debug("Creando usuario");
+  const nuevoUsuario = {
+    nombre: data.nombre,
+    correo: data.correo,
+    password: data.password,
+    cliente: idCliente,
+  };
+  const usuario = await bd.create(nuevoUsuario);
+  const token = crearJWT(usuario);
+  const temp = usuario.toJSON();
+  delete temp.password;
+  return { usuario: temp, token };
 }
 
-async function existeUsuario(coleccion, correo) {
-  const docs = coleccion.findOne({ correo, borrado: false });
-  const busqueda = await procesarBusqueda(docs.exec());
-  return busqueda !== null;
+function crearCliente(data) {
+  const bd = funBD(modeloCliente);
+  if (data.empresarial) {
+    debug("Creando cliente empresarial");
+    const cliente = {
+      nombre: data.cliente.nombre,
+      correo: data.cliente.correo,
+      direccion: data.cliente.direccion,
+      cedula: data.cliente.cedula,
+    };
+    return bd.create(cliente);
+  }
+  debug("Creando cliente personal");
+  const cliente = {
+    nombre: data.nombre,
+    correo: data.correo,
+  };
+  return bd.create(cliente);
+}
+
+async function existeUsuario(correo) {
+  const conteo = await funBD(modeloUsuario).count({ correo, borrado: false });
+  return conteo > 0;
 }
 
 export default router;

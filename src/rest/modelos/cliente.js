@@ -5,7 +5,7 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  correos: {
+  correo: {
     type: String,
     required: true,
   },
