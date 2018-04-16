@@ -5,6 +5,10 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  fechaEnvio: {
+    type: Date,
+    default: Date.now,
+  },
   emisor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "empleado",
@@ -15,12 +19,16 @@ const esquema = new mongoose.Schema({
     ref: "empleado",
     required: true,
   },
-  fechaEnvio: {
-    type: Date,
-    default: Date.now,
+  cliente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "cliente",
+    required: true,
   },
   borrado: {
-    type: Boolean, default: false, select: false, index: true,
+    type: Boolean,
+    default: false,
+    select: false,
+    index: true,
   },
 });
 

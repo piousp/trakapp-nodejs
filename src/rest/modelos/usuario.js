@@ -15,6 +15,11 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cliente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "cliente",
+    required: true,
+  },
   borrado: {
     type: Boolean,
     default: false,

@@ -1,34 +1,26 @@
 import express from "express";
-import empleado from "../modelos/empleado.js";
-import funDB from "../comun-db.js";
-import { getID, getBase, deleteID, ok, error } from "./_base";
-
-export default (io) => {
-  const router = express.Router();
-  const comun = funDB(empleado);
-
-  getID(router, empleado);
-  getBase(router, empleado);
-  deleteID(router, empleado);
-
-  router.put("/:id", putID);
-  router.post("/", postBase);
+import D from "debug";
+import modelo from "../modelos/empleado.js";
+import * as funBD from "./_base";
 
 
-  function putID(req, res) {
-    comun.findOneAndUpdate(req.params.id, req.body)
-      .then((obj) => {
-        io.sockets.emit("actualizarPosicion", obj);
-        return res.json(obj);
-      })
-      .catch(error(res));
-  }
+const debug = D("ciris:rutas/empleado.js");
 
-  function postBase(req, res) {
-    req.body.password = "movil123";
-    comun.create(req.body)
-      .then(ok(res))
-      .catch(error(res));
-  }
-  return router;
-};
+const router = express.Router();
+
+funBD.getID(router, modelo);
+funBD.getBase(router, modelo);
+funBD.putID(router, modelo);
+funBD.deleteID(router, modelo);
+
+router.post("/", postBase);
+
+function postBase(req, res) {
+  debug("Post base");
+  req.body.password = "movil123";
+  funBD(modelo).create(req.body)
+    .then(funBD.ok(res))
+    .catch(funBD.error(res));
+}
+
+export default router;

@@ -19,19 +19,15 @@ async function comparePassword(inputPassword) {
   }
 }
 
-function encriptar(modelo, next) {
-  bcrypt.genSalt(SALT_WORK_FACTOR, (err, salt) => {
-    if (err) {
-      return next(err);
-    }
-    return bcrypt.hash(modelo.password, salt, (err2, hash) => {
-      if (err2) {
-        return next(err2);
-      }
-      modelo.password = hash;
-      return next();
-    });
-  });
+async function encriptar(modelo, next) {
+  try {
+    const salt = await util.promisify(bcrypt.genSalt)(SALT_WORK_FACTOR);
+    const hash = await util.promisify(bcrypt.hash)(modelo.password, salt);
+    modelo.password = hash;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 }
 
 function presave(next) {

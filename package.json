@@ -1,6 +1,6 @@
 {
   "name": "nodejs-backend",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Proyecto base para el backend realizado con Node",
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",
@@ -16,7 +16,7 @@
   },
   "engines": {
     "node": "~8.9.x",
-    "npm": "~5.7.x",
+    "npm": "~5.6.x",
     "cpu": [
       "x64",
       "ia32"
@@ -36,6 +36,7 @@
     "moment": "2.20.1",
     "mongoose": "5.0.13",
     "mongoose-auto-increment": "5.0.1",
+    "mongoose-geojson-schema": "2.1.2",
     "socket.io": "2.0.4",
     "tape": "4.8.0"
   },
