@@ -114,10 +114,10 @@ async function updateMany(modelo, pquery, body) {
   return agregarCatch(modelo.update(pquery, body, opciones));
 }
 
-async function deleteOne(modelo, pid) {
+async function deleteOne(modelo, query) {
   debug("Invocando deleteOne");
   const opciones = { multi: false, upsert: false };
-  return agregarCatch(modelo.update({ _id: pid }, { $set: { borrado: true } }, opciones));
+  return agregarCatch(modelo.update(query, { $set: { borrado: true } }, opciones));
 }
 
 async function deleteMany(modelo, pquery) {
@@ -158,7 +158,6 @@ async function procesarBusqueda(query) {
   debug("Procesando búsqueda de mongo");
   try {
     const resp = await query;
-    debug(resp);
     if (isEmpty(resp)) {
       debug("Búsqueda vacía");
       return null;
