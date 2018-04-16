@@ -40,16 +40,18 @@ function funDB(modelo) {
 }
 
 async function find(modelo, pquery, pagination, populate) {
-  debug("find");
+  debug("Invocando find con los siguientes params:", pquery, pagination, populate);
   const query = pquery || { borrado: false };
+  debug("Parseando paginación");
   const abs = skipLimitABS(pagination || {});
-  const docs = modelo
-    .find(query, { password: 0 })
-    .skip(abs.total)
-    .limit(abs.cantidad)
-    .populate(populate || "")
-    .lean();
+  debug("Creando objeto Query de mongoose");
   try {
+    const docs = modelo
+      .find(query, { password: 0 })
+      .skip(abs.total)
+      .limit(abs.cantidad)
+      .populate(populate || "")
+      .lean();
     const objetos = await docs.exec();
     const conteo = await modelo.count(query).exec();
     return {
@@ -57,6 +59,7 @@ async function find(modelo, pquery, pagination, populate) {
       cant: conteo,
     };
   } catch (err) {
+    debug(err);
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }
