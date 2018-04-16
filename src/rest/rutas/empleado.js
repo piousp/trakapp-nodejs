@@ -6,40 +6,50 @@ import { getID, deleteID, error } from "./_base";
 
 const debug = D("ciris:rutas/empleado.js");
 
-export default (io) => {
-  const router = express.Router();
-  const comun = funDB(empleado);
+const router = express.Router();
+const comun = new Comun(empleado);
 
-  getID(router, empleado);
+router.get("/:id", getID);
+router.get("/", getBase);
+router.put("/:id", putID);
+router.post("/", postBase);
 
-  deleteID(router, empleado);
-  router.get("/", getLista);
-  router.put("/:id", putID);
-  router.post("/", postBase);
+function getID(req, res) {
+  comun.findOne(req.params.id)
+    .then(ok(res))
+    .catch(error(res));
+}
 
-  async function getLista(req, res) {
-    debug("Listando empleados para el cliente", req.usuario);
-    const query = { cliente: req.usuario, borrado: false };
-    const empleados = await comun.find(query, req.query);
-    res.send(empleados);
-  }
+function getBase(req, res) {
+  comun.find()
+    .then(ok(res))
+    .catch(error(res));
+}
 
+function putID(req, res) {
+  comun.findOneAndUpdate(req.params.id, req.body)
+    .then(ok(res))
+    .catch(error(res));
+}
 
-  function putID(req, res) {
-    comun.findOneAndUpdate(req.params.id, req.body)
-      .then((obj) => {
-        io.sockets.emit("actualizarPosicion", obj);
-        return res.json(obj);
-      })
-      .catch(error(res));
-  }
+function postBase(req, res) {
+  req.body.password = "movil123";
+  comun.create(req.body)
+    .then(ok(res))
+    .catch(error(res));
+}
 
-  async function postBase(req, res) {
-    debug("Creando un empleado para el cliente", req.usuario);
-    req.body.password = "movil123";
-    req.body.cliente = req.usuario;
-    const resBd = await comun.create(req.body);
-    res.send(resBd);
-  }
-  return router;
-};
+function ok(res) {
+  return obj => res.json(obj);
+}
+
+function error(res) {
+  return (err) => {
+    if (isEmpty(err)) {
+      return res.status(200).send({});
+    }
+    return res.status(500).send(err);
+  };
+}
+
+export default router;

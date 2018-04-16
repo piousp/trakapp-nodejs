@@ -1,4 +1,4 @@
-const db = "mongodb://localhost:29531/base";
+const db = "mongodb://localhost:29531/rastreador";
 
 export default {
   TOKEN_SECRET: process.env.TOKEN_SECRET || "Sunlight Yellow Overdrive",
