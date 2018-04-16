@@ -1,5 +1,5 @@
 import express from "express";
-import { tarea } from "../modelos/tarea.js";
+import tarea from "../modelos/tarea.js";
 import funDB from "../comun-db.js";
 import { getID, putID, postBase, deleteID, ok, error } from "./_base";
 
@@ -16,6 +16,7 @@ deleteID(router, tarea);
 function getTareasEmpleado(req, res) {
   const query = {
     borrado: false,
+    cliente: req.cliente,
     empleado: req.params.id,
   };
   comun.find(query)
@@ -27,6 +28,7 @@ function getTareasEmpleado(req, res) {
 function getBase(req, res) {
   const query = {
     borrado: false,
+    cliente: req.cliente,
     start: {
       $gte: req.query.fechaInicio,
       $lte: req.query.fechaFin,

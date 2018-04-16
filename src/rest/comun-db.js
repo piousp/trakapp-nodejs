@@ -40,16 +40,18 @@ function funDB(modelo) {
 }
 
 async function find(modelo, pquery, pagination, populate) {
-  debug("find");
+  debug("Invocando find con los siguientes params:", pquery, pagination, populate);
   const query = pquery || { borrado: false };
+  debug("Parseando paginación");
   const abs = skipLimitABS(pagination || {});
-  const docs = modelo
-    .find(query, { password: 0 })
-    .skip(abs.total)
-    .limit(abs.cantidad)
-    .populate(populate || "")
-    .lean();
+  debug("Creando objeto Query de mongoose");
   try {
+    const docs = modelo
+      .find(query, { password: 0 })
+      .skip(abs.total)
+      .limit(abs.cantidad)
+      .populate(populate || "")
+      .lean();
     const objetos = await docs.exec();
     const conteo = await modelo.count(query).exec();
     return {
@@ -57,6 +59,7 @@ async function find(modelo, pquery, pagination, populate) {
       cant: conteo,
     };
   } catch (err) {
+    debug(err);
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }
@@ -114,10 +117,10 @@ async function updateMany(modelo, pquery, body) {
   return agregarCatch(modelo.update(pquery, body, opciones));
 }
 
-async function deleteOne(modelo, pid) {
+async function deleteOne(modelo, query) {
   debug("Invocando deleteOne");
   const opciones = { multi: false, upsert: false };
-  return agregarCatch(modelo.update({ _id: pid }, { $set: { borrado: true } }, opciones));
+  return agregarCatch(modelo.update(query, { $set: { borrado: true } }, opciones));
 }
 
 async function deleteMany(modelo, pquery) {
@@ -158,7 +161,6 @@ async function procesarBusqueda(query) {
   debug("Procesando búsqueda de mongo");
   try {
     const resp = await query;
-    debug(resp);
     if (isEmpty(resp)) {
       debug("Búsqueda vacía");
       return null;
