@@ -1,6 +1,8 @@
 import D from "debug";
 import io from "socket.io";
 import moment from "moment";
+import filter from "lodash/filter";
+import forEach from "lodash/forEach";
 import entorno from "../entorno.js";
 import funBD from "../rest/comun-db.js";
 import empleado from "../rest/modelos/empleado.js";
@@ -22,6 +24,15 @@ function configurarOyentes(socketo) {
         });
       }
       return socketo.sockets.emit("actualizarPosicion", data);
+    });
+    s.on("sesionIniciada", (usuario) => {
+      s.username = usuario._id;
+      debug(`El usuario con el id ${usuario._id} se ha conectado`);
+    });
+    s.on("mensajeEnviado", (mensaje) => {
+      debug("Enviando mensaje solo a los receptores");
+      const receptores = filter(socketo.sockets.sockets, { username: mensaje.receptor });
+      forEach(receptores, r => r.emit("recibirMensaje", mensaje));
     });
   });
 }
