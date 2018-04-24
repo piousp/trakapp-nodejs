@@ -14,9 +14,10 @@ export default app => configurarOyentes(iniciarOyente(app));
 
 function configurarOyentes(socketo) {
   socketo.on("connect", (s) => {
-    s.on("actualizarPosicion", (data) => {
+    s.on("actualizarPosicion", async (data) => {
       debug("evento de actualizarPosicion");
-      const resp = actualizarPosicion(data);
+      const resp = await actualizarPosicion(data);
+      debug("resp", JSON.stringify(resp));
       return socketo.sockets.emit("actualizarPosicion", resp);
     });
     s.on("sesionIniciada", (usuario) => {
@@ -35,8 +36,10 @@ async function actualizarPosicion(data) {
   const nvaFecha = moment(data.ubicacion.lastUpdate).add(15, "m");
   const pos = {
     type: "Point",
-    coordinates: [data.ubicacion.lng, data.ubicacion.lat],
+    coordinates: data.ubicacion.pos.coordinates,
   };
+  debug(JSON.stringify(pos));
+  debug("Verificando fecha", data.ubicacion.lastUpdate, nvaFecha.format());
   if (data._id && (!data.ubicacion.lastUpdate || moment().isAfter(nvaFecha))) {
     debug("Se debe actualizar la ubicación del empleado");
 
