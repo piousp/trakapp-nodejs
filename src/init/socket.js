@@ -15,15 +15,9 @@ export default app => configurarOyentes(iniciarOyente(app));
 function configurarOyentes(socketo) {
   socketo.on("connect", (s) => {
     s.on("actualizarPosicion", (data) => {
-      const nvaFecha = moment(data.position.lastUpdate).add(30, "m");
-      if (data.position.lastUpdate && moment().isAfter(nvaFecha)) {
-        data.position.lastUpdate = moment();
-        return cEmpleados.findOneAndUpdate(data._id, data).then((resp) => {
-          delete resp.password;
-          return socketo.sockets.emit("actualizarPosicion", resp);
-        });
-      }
-      return socketo.sockets.emit("actualizarPosicion", data);
+      debug("evento de actualizarPosicion");
+      const resp = actualizarPosicion(data);
+      return socketo.sockets.emit("actualizarPosicion", resp);
     });
     s.on("sesionIniciada", (usuario) => {
       s.username = usuario._id;
@@ -35,6 +29,24 @@ function configurarOyentes(socketo) {
       forEach(receptores, r => r.emit("recibirMensaje", mensaje));
     });
   });
+}
+
+async function actualizarPosicion(data) {
+  const nvaFecha = moment(data.position.lastUpdate).add(15, "m");
+
+  if (!data.position.lastUpdate || moment().isAfter(nvaFecha)) {
+    debug("Se debe actualizar la ubicación del empleado");
+    const ubicacion = {
+      lastUpdate: moment(),
+      coordenadas: [data.ubicacion.lng, data.ubicacion.lat],
+    };
+    const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
+    delete empResp.password;
+    return empResp;
+  }
+  debug("No hay que actualizar en BD. Retornando");
+  data.ubicacion.coordenadas = [data.ubicacion.lng, data.ubicacion.lat];
+  return data;
 }
 
 function iniciarOyente(app) {

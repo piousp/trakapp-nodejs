@@ -1,3 +1,4 @@
+import "mongoose-geojson-schema";
 import mongoose from "mongoose";
 import { presave, comparePassword } from "./encriptador";
 
@@ -16,14 +17,10 @@ const esquema = new mongoose.Schema({
     type: String,
     default: "movil123",
   },
-  position: {
-    lat: {
-      type: Number,
-      default: 0.0,
-    },
-    lng: {
-      type: Number,
-      default: 0.0,
+  ubicacion: {
+    coordenadas: {
+      type: mongoose.Schema.Types.Point,
+      index: "2d",
     },
     lastUpdate: Date,
   },
@@ -33,7 +30,10 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   borrado: {
-    type: Boolean, default: false, select: false, index: true,
+    type: Boolean,
+    default: false,
+    select: false,
+    index: true,
   },
 });
 
