@@ -1,7 +1,7 @@
 {
-  "name": "nodejs-backend",
-  "version": "1.2.1",
-  "description": "Proyecto base para el backend realizado con Node",
+  "name": "trakapp-backend",
+  "version": "1.3.0",
+  "description": "Backend de Trakapp",
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",
   "scripts": {

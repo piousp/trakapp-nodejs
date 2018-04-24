@@ -5,4 +5,5 @@ export default {
   MONGO_URI: process.env.MONGO_URI || db,
   PUERTO: process.env.PUERTO || 3001,
   ORIGIN: process.env.ORIGIN || "http://localhost:3000",
+  PRODUCCION: process.env.NODE_ENV === "production" || false,
 };
