@@ -32,9 +32,9 @@ function configurarOyentes(socketo) {
 }
 
 async function actualizarPosicion(data) {
-  const nvaFecha = moment(data.position.lastUpdate).add(15, "m");
+  const nvaFecha = moment(data.ubicacion.lastUpdate).add(15, "m");
 
-  if (!data.position.lastUpdate || moment().isAfter(nvaFecha)) {
+  if (!data.ubicacion.lastUpdate || moment().isAfter(nvaFecha)) {
     debug("Se debe actualizar la ubicación del empleado");
     const ubicacion = {
       lastUpdate: moment(),
