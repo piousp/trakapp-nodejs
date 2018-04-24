@@ -44,9 +44,15 @@ async function actualizarPosicion(data) {
       lastUpdate: moment(),
       pos,
     };
-    const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
-    delete empResp.password;
-    return empResp;
+    try {
+      const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
+      delete empResp.password;
+      return empResp;
+    } catch (err) {
+      debug("Estalló:", err);
+      data.ubicacion.pos = pos;
+      return data;
+    }
   }
   debug("No hay que actualizar en BD. Retornando");
   data.ubicacion.pos = pos;

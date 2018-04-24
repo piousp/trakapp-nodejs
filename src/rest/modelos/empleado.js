@@ -20,7 +20,7 @@ const esquema = new mongoose.Schema({
   ubicacion: {
     pos: {
       type: mongoose.Schema.Types.Point,
-      index: "2d",
+      index: "2dsphere",
     },
     lastUpdate: Date,
   },

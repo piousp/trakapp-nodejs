@@ -23,7 +23,6 @@ function login(coleccion) {
       if (usuario) {
         debug("Usuario obtenido");
         const token = await validarPassword(usuario, req.body.password);
-        debug(token);
         return res.send(token);
       }
       return res.status(400).send("Credenciales inválidos");
@@ -66,7 +65,7 @@ async function registrar(req, res) {
 
 async function validarPassword(usuario, password) {
   try {
-    debug("Usuario encontrado, comparando el passwd", usuario);
+    debug("Usuario encontrado, comparando el passwd");
     const passwdValido = await usuario.comparePassword(password);
     if (passwdValido) {
       const token = crearJWT(usuario);

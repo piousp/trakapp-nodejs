@@ -17,7 +17,7 @@ const esquema = new mongoose.Schema({
   },
   ubicacion: {
     type: mongoose.Schema.Types.Point,
-    index: "2d",
+    index: "2dsphere",
   },
   empleado: {
     type: mongoose.Schema.Types.ObjectId,
