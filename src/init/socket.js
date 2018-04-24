@@ -37,7 +37,7 @@ async function actualizarPosicion(data) {
     type: "Point",
     coordinates: [data.ubicacion.lng, data.ubicacion.lat],
   };
-  if (data._id && !data.ubicacion.lastUpdate || moment().isAfter(nvaFecha)) {
+  if (data._id && (!data.ubicacion.lastUpdate || moment().isAfter(nvaFecha))) {
     debug("Se debe actualizar la ubicación del empleado");
 
     const ubicacion = {
