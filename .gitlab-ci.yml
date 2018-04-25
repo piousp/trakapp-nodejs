@@ -20,7 +20,7 @@ deploy_desarrollo:
     - npm run build
     - rsync -rlDv --delete * /software/trakapp/backend/
     - "forever stop trakapp 2>/dev/null || :"
-    - NODE_ENV=$MODO PUERTO=$PUERTO ORIGIN=$ORIGIN MONGO_URI=$MONGO_URI forever start --append --uid trakapp /software/base/backend/dist
+    - NODE_ENV=$MODO PUERTO=$PUERTO ORIGIN=$ORIGIN MONGO_URI=$MONGO_URI forever start --append --uid trakapp /software/trakapp/backend/dist
   environment:
     name: desarrollo
     url: trackapp.ciriscr.com:7001
