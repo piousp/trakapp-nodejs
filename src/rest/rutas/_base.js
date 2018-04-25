@@ -15,11 +15,11 @@ export {
   error,
 };
 
-function getID(router, modelo) {
+function getID(router, modelo, populate) {
   debug("getID");
   const comun = funDB(modelo);
   function getIDInterno(req, res) {
-    comun.findOne(null, { _id: req.params.id, cliente: req.cliente, borrado: false })
+    comun.findOne(null, { _id: req.params.id, cliente: req.cliente, borrado: false }, populate)
       .then(ok(res))
       .catch(error(res));
   }
