@@ -3,10 +3,6 @@ before_script:
   - nvm use 8.9.4
   - npm install -g forever
 
-cache:
-  paths:
-    - node_modules/
-
 stages:
   - test
   - deploy
