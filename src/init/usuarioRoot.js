@@ -12,7 +12,7 @@ export default revisarPorRoot;
 async function revisarPorRoot() {
   debug("Revisando por Root...");
   try {
-    const root = await comun.findOne(null, { correo: "root" });
+    const root = await comun.findOne(null, { correo: "root@root.com" });
     debug(root);
     if (root) {
       return debug("Root encontrado!");

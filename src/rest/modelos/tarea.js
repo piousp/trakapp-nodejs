@@ -34,6 +34,11 @@ const esquema = new mongoose.Schema({
     select: false,
     index: true,
   },
+  activa: {
+    type: Boolean,
+    default: true,
+    index: true,
+  },
 });
 
 const modelo = mongoose.model("tarea", esquema);
