@@ -1,6 +1,9 @@
 {
   "presets": [["env", {"targets": {"node": "current"}}]],
   "env": {
+    "development": {
+      "plugins": ["envify"],
+    },
     "test": {
       "presets": ["env"],
       "plugins": ["istanbul"]
