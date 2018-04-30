@@ -12,14 +12,14 @@ export default revisarPorRoot;
 async function revisarPorRoot() {
   debug("Revisando por Root...");
   try {
-    const root = await comun.findOne(null, { correo: "root@root.com" });
+    const root = await comun.findOne(null, { correo: "root@ciriscr.com" });
     debug(root);
     if (root) {
       return debug("Root encontrado!");
     }
     debug("Root no encontrado, creando...");
     const usuarioRoot = {
-      correo: "root",
+      correo: "root@ciriscr.com",
       password: "rastreadorRootCiris",
       nombre: "root",
       cliente: new mongoose.Types.ObjectId(),
