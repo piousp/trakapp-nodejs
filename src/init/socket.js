@@ -13,18 +13,19 @@ const cEmpleados = funBD(empleado);
 export default app => configurarOyentes(iniciarOyente(app));
 
 function configurarOyentes(socketo) {
-  socketo.on("connect", (s) => {
-    s.on("actualizarPosicion", async (data) => {
-      debug("evento de actualizarPosicion");
-      const resp = await actualizarPosicion(data);
+  socketo.on("connect", (dispositivo) => {
+    dispositivo.on("actualizarPosicion", async (usuario) => {
+      debug("evento de actualizarPosicion con el id", usuario._id);
+      dispositivo.username = usuario._id;
+      const resp = await actualizarPosicion(usuario);
       debug("resp", JSON.stringify(resp));
       return socketo.sockets.emit("actualizarPosicion", resp);
     });
-    s.on("sesionIniciada", (usuario) => {
-      s.username = usuario._id;
+    dispositivo.on("sesionIniciada", (usuario) => {
+      dispositivo.username = usuario._id;
       debug(`El usuario con el id ${usuario._id} se ha conectado`);
     });
-    s.on("mensajeEnviado", (mensaje) => {
+    dispositivo.on("mensajeEnviado", (mensaje) => {
       debug("Enviando mensaje solo a los receptores");
       const receptores = filter(socketo.sockets.sockets, { username: mensaje.receptor });
       forEach(receptores, r => r.emit("recibirMensaje", mensaje));
@@ -33,13 +34,13 @@ function configurarOyentes(socketo) {
 }
 
 async function actualizarPosicion(data) {
-  const nvaFecha = moment(data.ubicacion.lastUpdate).add(15, "m");
+  const nvaFecha = moment(data.ubicacion.lastUpdate, "YYYY-MM-DDTHH:mm:ss.SSSSZ").add(5, "m");
   const pos = {
     type: "Point",
     coordinates: data.ubicacion.pos.coordinates,
   };
-  debug(JSON.stringify(pos));
-  debug("Verificando fecha", data.ubicacion.lastUpdate, nvaFecha.format());
+  // Verificando fecha 2018-04-25T22:49:12.181Z 2018-04-25T17:04:12-06:00
+  debug("Verificando fecha", moment().format(), nvaFecha.format(), moment().isAfter(nvaFecha));
   if (data._id && (!data.ubicacion.lastUpdate || moment().isAfter(nvaFecha))) {
     debug("Se debe actualizar la ubicación del empleado");
 

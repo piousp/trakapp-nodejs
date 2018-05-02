@@ -22,7 +22,7 @@ async function revisarPorRoot() {
       correo: "root@ciriscr.com",
       password: "rastreadorRootCiris",
       nombre: "root",
-      cliente: new mongoose.Types.ObjectId(),
+      cuenta: new mongoose.Types.ObjectId(),
     };
     const nuevoRoot = await comun.create(usuarioRoot);
     if (nuevoRoot._id) {

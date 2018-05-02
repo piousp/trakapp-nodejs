@@ -1,9 +1,10 @@
 import express from "express";
 import D from "debug";
+import moment from "moment";
 import { crearJWT } from "./middleware.js";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloEmpleado from "../modelos/empleado.js";
-import modeloCliente from "../modelos/cliente.js";
+import modeloCuenta from "../modelos/cuenta.js";
 import funBD from "../comun-db.js";
 import { ErrorMongo, UsuarioInvalido } from "../../util/errores.js";
 
@@ -47,8 +48,8 @@ async function registrar(req, res) {
     if (existe) {
       return res.status(409).send("El usuario ya existe");
     }
-    const cliente = await crearCliente(req.body);
-    const usuario = await crearUsuario(req.body, cliente._id);
+    const cuenta = await crearCuenta(req.body);
+    const usuario = await crearUsuario(req.body, cuenta._id);
     debug("Usuario creado");
     return res.send(usuario);
   } catch (err) {
@@ -70,6 +71,9 @@ async function validarPassword(usuario, password) {
     if (passwdValido) {
       const token = crearJWT(usuario);
       const temp = usuario.toJSON();
+      if (usuario.ubicacion) {
+        temp.ubicacion.lastUpdate = moment(temp.ubicacion.lastUpdate, "YYYY-MM-DDTHH:mm:ss.SSSSZ");
+      }
       delete temp.password;
       return { usuario: temp, token };
     }
@@ -80,14 +84,14 @@ async function validarPassword(usuario, password) {
   }
 }
 
-async function crearUsuario(data, idCliente) {
+async function crearUsuario(data, idCuenta) {
   const bd = funBD(modeloUsuario);
   debug("Creando usuario");
   const nuevoUsuario = {
     nombre: data.nombre,
     correo: data.correo,
     password: data.password,
-    cliente: idCliente,
+    cuenta: idCuenta,
   };
   const usuario = await bd.create(nuevoUsuario);
   const token = crearJWT(usuario);
@@ -96,24 +100,24 @@ async function crearUsuario(data, idCliente) {
   return { usuario: temp, token };
 }
 
-function crearCliente(data) {
-  const bd = funBD(modeloCliente);
+function crearCuenta(data) {
+  const bd = funBD(modeloCuenta);
   if (data.empresarial) {
-    debug("Creando cliente empresarial");
-    const cliente = {
-      nombre: data.cliente.nombre,
-      correo: data.cliente.correo,
-      direccion: data.cliente.direccion,
-      cedula: data.cliente.cedula,
+    debug("Creando cuenta empresarial");
+    const cuenta = {
+      nombre: data.cuenta.nombre,
+      correo: data.cuenta.correo,
+      direccion: data.cuenta.direccion,
+      cedula: data.cuenta.cedula,
     };
-    return bd.create(cliente);
+    return bd.create(cuenta);
   }
-  debug("Creando cliente personal");
-  const cliente = {
+  debug("Creando cuenta personal");
+  const cuenta = {
     nombre: data.nombre,
     correo: data.correo,
   };
-  return bd.create(cliente);
+  return bd.create(cuenta);
 }
 
 async function existeUsuario(correo) {
