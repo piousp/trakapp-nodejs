@@ -21,6 +21,7 @@ export {
   efectuarCambio,
   agregarCatch,
   procesarBusqueda,
+  skipLimitABS,
 };
 
 function funDB(modelo) {
