@@ -10,7 +10,7 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   direccion: {
-    type: Date,
+    type: String,
   },
   cedula: {
     type: String,
