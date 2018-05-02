@@ -19,9 +19,9 @@ const esquema = new mongoose.Schema({
     ref: "empleado",
     required: true,
   },
-  cliente: {
+  cuenta: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "cliente",
+    ref: "cuenta",
     required: true,
   },
   borrado: {

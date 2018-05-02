@@ -7,7 +7,7 @@ const router = express.Router();
 const comun = funDB(tarea);
 
 router.get("/empleado/:id", getTareasEmpleado);
-getID(router, tarea, "cliente");
+getID(router, tarea, "cuenta");
 router.get("/", getBase);
 router.put("/completar/:id", completar);
 putID(router, tarea);
@@ -17,7 +17,7 @@ deleteID(router, tarea);
 function getTareasEmpleado(req, res) {
   const query = {
     borrado: false,
-    cliente: req.cliente,
+    cuenta: req.cuenta,
     activa: true,
     empleado: req.params.id,
   };
@@ -30,7 +30,7 @@ function getTareasEmpleado(req, res) {
 function getBase(req, res) {
   const query = {
     borrado: false,
-    cliente: req.cliente,
+    cuenta: req.cuenta,
     start: {
       $gte: req.query.fechaInicio,
       $lte: req.query.fechaFin,

@@ -15,9 +15,9 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  cliente: {
+  cuenta: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "cliente",
+    ref: "cuenta",
     required: true,
   },
   borrado: {
