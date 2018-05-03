@@ -6,6 +6,6 @@ export default {
   PUERTO: process.env.PUERTO || 3001,
   ORIGIN: process.env.ORIGIN || "http://localhost:3000",
   PRODUCCION: process.env.NODE_ENV === "production" || false,
-  API_KEY: "key-d49308b677d961109141b24ef95b6722",
-  DOMAIN: "trakapp.ciriscr.com",
+  API_KEY: process.env.MAILGUN_API_KEY || "key-d49308b677d961109141b24ef95b6722",
+  DOMAIN: process.env.DOMAIN || "trakapp.ciriscr.com",
 };
