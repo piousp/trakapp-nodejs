@@ -2,7 +2,7 @@ import express from "express";
 import orderBy from "lodash/orderBy";
 import D from "debug";
 import mensaje from "../modelos/mensaje.js";
-import funDB, { skipLimitABS } from "../comun-db.js";
+import funDB from "../comun-db.js";
 import { postBase, error } from "./_base";
 
 const debug = D("ciris:mensajes");
@@ -22,15 +22,13 @@ async function getBase(req, res) {
       $in: [req.query.emisor, req.params.receptor],
     },
   };
-  const abs = skipLimitABS(req.query);
   try {
     const msjs = await mensaje
       .find(query)
       .sort({ fechaEnvio: -1 })
-      .skip(abs.total)
-      .limit(abs.cantidad)
+      .skip(parseInt(req.query.cargados || 0, 10))
+      .limit(parseInt(req.query.cantidad || 0, 10))
       .lean();
-    debug("Imprimiendo mensajes", msjs);
     const cant = await comun.count(query);
     debug("Imprimiendo cantidad", cant);
     const docs = orderBy(msjs, "fechaEnvio", "asc");
@@ -39,6 +37,5 @@ async function getBase(req, res) {
     return error(res);
   }
 }
-
 
 export default router;
