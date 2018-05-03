@@ -19,7 +19,7 @@ router.post("/", postBase);
 function postBase(req, res) {
   debug("Post base");
   req.body.password = "movil123";
-  req.body.cliente = req.cliente;
+  req.body.cuenta = req.cuenta;
   funBD(modelo).create(req.body)
     .then(ok(res))
     .catch(error(res));

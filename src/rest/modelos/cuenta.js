@@ -10,7 +10,7 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   direccion: {
-    type: Date,
+    type: String,
   },
   cedula: {
     type: String,
@@ -23,7 +23,7 @@ const esquema = new mongoose.Schema({
   },
 });
 
-const modelo = mongoose.model("cliente", esquema);
+const modelo = mongoose.model("cuenta", esquema);
 
 export { esquema };
 export default modelo;
