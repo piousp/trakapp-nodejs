@@ -16,9 +16,9 @@ export {
 };
 
 function getID(router, modelo, populate) {
-  debug("getID");
   const comun = funDB(modelo);
   function getIDInterno(req, res) {
+    debug("getID");
     comun.findOne(null, { _id: req.params.id, cuenta: req.cuenta, borrado: false }, populate)
       .then(ok(res))
       .catch(error(res));
@@ -28,9 +28,9 @@ function getID(router, modelo, populate) {
 }
 
 function getBase(router, modelo) {
-  debug("getBase");
   const comun = funDB(modelo);
   function getBaseInterno(req, res) {
+    debug("getBase");
     comun.find({ cuenta: req.cuenta, borrado: false }, req.query)
       .then(ok(res))
       .catch(error(res));
@@ -39,9 +39,9 @@ function getBase(router, modelo) {
   return router;
 }
 function putID(router, modelo) {
-  debug("putID");
   const comun = funDB(modelo);
   function putIDInterno(req, res) {
+    debug("putID", req.body);
     const quer = { _id: req.params.id, cuenta: req.cuenta, borrado: false };
     comun.findOneAndUpdate(null, req.body, quer)
       .then(ok(res))
@@ -53,9 +53,9 @@ function putID(router, modelo) {
 
 
 function postBase(router, modelo) {
-  debug("postBase");
   const comun = funDB(modelo);
   function postBaseInterno(req, res) {
+    debug("postBase");
     req.body.cuenta = req.cuenta;
     comun.create(req.body)
       .then(ok(res))
@@ -66,9 +66,9 @@ function postBase(router, modelo) {
 }
 
 function deleteID(router, modelo) {
-  debug("deleteID");
   const comun = funDB(modelo);
   function deleteIDInterno(req, res) {
+    debug("deleteID");
     const quer = { _id: req.params.id, cuenta: req.cuenta, borrado: false };
     comun.deleteOne(quer)
       .then(ok(res))
