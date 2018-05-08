@@ -30,6 +30,9 @@ function configurarOyentes(socketo) {
       const receptores = filter(socketo.sockets.sockets, { username: mensaje.receptor });
       forEach(receptores, r => r.emit("recibirMensaje", mensaje));
     });
+    dispositivo.on("broadcastEnviado", (mensaje) => {
+      dispositivo.broadcast.emit("recibirBroadcast", mensaje);
+    });
   });
 }
 
