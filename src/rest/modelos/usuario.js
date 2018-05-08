@@ -6,6 +6,9 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  apellidos: {
+    type: String,
+  },
   correo: {
     type: String,
     required: true,
