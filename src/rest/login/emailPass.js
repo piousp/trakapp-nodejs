@@ -1,50 +1,36 @@
 import express from "express";
 import D from "debug";
-import bcrypt from "bcrypt";
-import util from "util";
 import moment from "moment";
-import { crearJWT } from "./middleware.js";
+import { crearJWT, estaAutorizado } from "./middleware.js";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloEmpleado from "../modelos/empleado.js";
 import modeloCuenta from "../modelos/cuenta.js";
 import funBD from "../comun-db.js";
 import modeloRecu from "../modelos/recuperacion.js";
 import { ErrorMongo, UsuarioInvalido } from "../../util/errores.js";
+import { encriptar } from "../modelos/encriptador.js";
 
 import enviarCorreo from "../../util/correos.js";
 
 const debug = D("ciris:rest/login/emailPass.js");
 const router = express.Router();
-const SALT_WORK_FACTOR = 10;
 
-router.post("/login/movil", login(modeloEmpleado));
-router.post("/login", login(modeloUsuario));
+const comunUsuario = funBD(modeloUsuario);
+const comunEmpleado = funBD(modeloEmpleado);
+const comunCuenta = funBD(modeloCuenta);
+
+router.post("/login/movil", login(comunEmpleado));
+router.post("/login", login(comunUsuario));
 router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio);
-router.post("/cambiarContrasena/movil/:id", cambiarContrasena(modeloEmpleado));
+router.post("/cambiarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
+router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
+router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena);
 
 function login(coleccion) {
-  return async (req, res) => {
-    try {
-      debug("Realizando la acción de login");
-      const usuario = await funBD(coleccion)
-        .findOneFat(null, { correo: req.body.login, borrado: false });
-      if (usuario) {
-        debug("Usuario obtenido");
-        const token = await validarPassword(usuario, req.body.password);
-        return res.send(token);
-      }
-      return res.status(400).send("Credenciales inválidos");
-    } catch (err) {
-      debug(err);
-      if (err instanceof UsuarioInvalido) {
-        return res.status(400).send(err.message);
-      }
-      if (err instanceof ErrorMongo) {
-        return res.status(500).send(err.message);
-      }
-      return res.status(503).send(err.message);
-    }
+  return (req, res) => {
+    const query = { correo: req.body.login, borrado: false };
+    return loginGenerico(coleccion, query)(req, res);
   };
 }
 
@@ -90,7 +76,6 @@ async function validarPassword(usuario, password) {
 }
 
 async function crearUsuario(data, idCuenta) {
-  const bd = funBD(modeloUsuario);
   debug("Creando usuario");
   const nuevoUsuario = {
     nombre: data.nombre,
@@ -98,7 +83,7 @@ async function crearUsuario(data, idCuenta) {
     password: data.password,
     cuenta: idCuenta,
   };
-  const usuario = await bd.create(nuevoUsuario);
+  const usuario = await comunUsuario.create(nuevoUsuario);
   const token = crearJWT(usuario);
   const temp = usuario.toJSON();
   delete temp.password;
@@ -106,7 +91,6 @@ async function crearUsuario(data, idCuenta) {
 }
 
 function crearCuenta(data) {
-  const bd = funBD(modeloCuenta);
   if (data.empresarial) {
     debug("Creando cuenta empresarial");
     const cuenta = {
@@ -115,21 +99,21 @@ function crearCuenta(data) {
       direccion: data.cuenta.direccion,
       cedula: data.cuenta.cedula,
     };
-    return bd.create(cuenta);
+    return comunCuenta.create(cuenta);
   }
   debug("Creando cuenta personal");
   const cuenta = {
     nombre: data.nombre,
     correo: data.correo,
   };
-  return bd.create(cuenta);
+  return comunCuenta.create(cuenta);
 }
 
 async function solicitarCambio(req, res) {
   debug("Solicitar cambio de password");
   try {
     debug("Buscando usuario");
-    const usuario = await funBD(modeloEmpleado).findOne(null, { correo: req.body.correo });
+    const usuario = await comunEmpleado.findOne(null, { correo: req.body.correo });
     if (!usuario) {
       debug("El usuario no existe");
       return res.status(404).send("El usuario no existe");
@@ -148,7 +132,8 @@ async function solicitarCambio(req, res) {
       "</div>",
     };
     debug("Recuperación creada, enviando");
-    enviarCorreo(data);
+    const resp = await enviarCorreo(data);
+    debug(resp);
     return res.status(200).send("Se envió el correo para realizar el cambio de contraseña");
   } catch (err) {
     debug(err);
@@ -159,9 +144,9 @@ async function solicitarCambio(req, res) {
   }
 }
 
-function cambiarContrasena(modelo) {
+function recuperarContrasena(modelo) {
   return async (req, res) => {
-    debug("Cambiar contraseña");
+    debug("recuperarContrasena");
     try {
       debug("Buscando recuperacion");
       const recu = await funBD(modeloRecu).findOne(req.params.id);
@@ -173,12 +158,10 @@ function cambiarContrasena(modelo) {
         debug("Esa recuperacion ya está expirada");
         return res.status(404).send("Esa recuperacion ya está expirada");
       }
-      const salt = await util.promisify(bcrypt.genSalt)(SALT_WORK_FACTOR);
-      const hash = await util.promisify(bcrypt.hash)(req.body.password, salt);
-      const user = await funBD(modelo).updateOne(
+      const user = await modelo.updateOne(
         recu.idUsuario,
         {
-          password: hash,
+          password: await encriptar(req.body.password),
         },
       );
       if (!user) {
@@ -196,6 +179,58 @@ function cambiarContrasena(modelo) {
       return res.status(503).send(err.message);
     }
   };
+}
+
+function verificarPasswordCorrecto(req, res) {
+  debug("verificarPasswordCorrecto", req.usuario);
+  return loginGenerico(comunUsuario, { _id: req.usuario })(req, res);
+}
+
+function loginGenerico(coleccion, queryUsuario) {
+  return async function loginGenericoInterno(req, res) {
+    debug("loginGenerico");
+    try {
+      const usuario = await coleccion.findOneFat(null, queryUsuario);
+      if (usuario) {
+        debug("Usuario obtenido");
+        const token = await validarPassword(usuario, req.body.password);
+        return res.send(token);
+      }
+      return res.status(400).send("Credenciales inválidos");
+    } catch (err) {
+      debug(err);
+      if (err instanceof UsuarioInvalido) {
+        return res.status(400).send(err.message);
+      }
+      if (err instanceof ErrorMongo) {
+        return res.status(500).send(err.message);
+      }
+      return res.status(503).send(err.message);
+    }
+  };
+}
+
+async function cambiarContrasena(req, res) {
+  debug("cambiarContrasena");
+  try {
+    const user = await comunUsuario.updateOne(
+      req.usuario,
+      {
+        password: await encriptar(req.body.password),
+      },
+    );
+    if (!user) {
+      debug("Es usuario no existe");
+      return res.status(404).send("Es usuario no existe");
+    }
+    return res.send("");
+  } catch (err) {
+    debug(err);
+    if (err instanceof ErrorMongo) {
+      return res.status(500).send(err.message);
+    }
+    return res.status(503).send(err.message);
+  }
 }
 
 async function existeUsuario(correo) {
