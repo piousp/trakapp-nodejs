@@ -11,19 +11,19 @@ const esquema = new mongoose.Schema({
   },
   emisor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "empleado",
+    refPath: "modelo",
     required: true,
   },
   receptor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "empleado",
-    required: true,
   },
   cuenta: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "cuenta",
     required: true,
   },
+  modelo: String,
   borrado: {
     type: Boolean,
     default: false,
