@@ -6,6 +6,8 @@ const debug = D("ciris:modelos/encriptador.js");
 
 const SALT_WORK_FACTOR = 10;
 
+export { presave, comparePassword, encriptar };
+
 async function comparePassword(inputPassword) {
   try {
     const passwd = this.password;
@@ -19,11 +21,16 @@ async function comparePassword(inputPassword) {
   }
 }
 
-async function encriptar(modelo, next) {
+async function encriptar(password) {
+  debug("Encriptando password");
+  const salt = await util.promisify(bcrypt.genSalt)(SALT_WORK_FACTOR);
+  const hash = await util.promisify(bcrypt.hash)(password, salt);
+  return hash;
+}
+
+async function encriptarPasswordModelo(modelo, next) {
   try {
-    const salt = await util.promisify(bcrypt.genSalt)(SALT_WORK_FACTOR);
-    const hash = await util.promisify(bcrypt.hash)(modelo.password, salt);
-    modelo.password = hash;
+    modelo.password = encriptar(modelo.password);
     return next();
   } catch (err) {
     return next(err);
@@ -35,7 +42,5 @@ function presave(next) {
   if (!modelo.isModified("password")) {
     return next();
   }
-  return encriptar(modelo, next);
+  return encriptarPasswordModelo(modelo, next);
 }
-
-export { presave, comparePassword };
