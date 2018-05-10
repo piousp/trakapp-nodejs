@@ -29,6 +29,10 @@ const esquema = new mongoose.Schema({
     ref: "cuenta",
     required: true,
   },
+  nuevo: {
+    type: Boolean,
+    default: true,
+  },
   borrado: {
     type: Boolean,
     default: false,
