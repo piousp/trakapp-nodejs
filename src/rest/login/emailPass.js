@@ -25,7 +25,8 @@ router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio);
 router.post("/cambiarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
 router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
-router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena);
+router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
+router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
 
 function login(coleccion) {
   return (req, res) => {
@@ -210,27 +211,30 @@ function loginGenerico(coleccion, queryUsuario) {
   };
 }
 
-async function cambiarContrasena(req, res) {
-  debug("cambiarContrasena");
-  try {
-    const user = await comunUsuario.updateOne(
-      req.usuario,
-      {
-        password: await encriptar(req.body.password),
-      },
-    );
-    if (!user) {
-      debug("Es usuario no existe");
-      return res.status(404).send("Es usuario no existe");
+function cambiarContrasena(coleccion) {
+  return async function cambiarContrasenaInterno(req, res) {
+    debug("cambiarContrasena");
+    try {
+      const user = await coleccion.updateOne(
+        req.usuario,
+        {
+          password: await encriptar(req.body.password),
+          nuevo: false,
+        },
+      );
+      if (!user) {
+        debug("Es usuario no existe");
+        return res.status(404).send("Es usuario no existe");
+      }
+      return res.send("");
+    } catch (err) {
+      debug(err);
+      if (err instanceof ErrorMongo) {
+        return res.status(500).send(err.message);
+      }
+      return res.status(503).send(err.message);
     }
-    return res.send("");
-  } catch (err) {
-    debug(err);
-    if (err instanceof ErrorMongo) {
-      return res.status(500).send(err.message);
-    }
-    return res.status(503).send(err.message);
-  }
+  };
 }
 
 async function existeUsuario(correo) {
