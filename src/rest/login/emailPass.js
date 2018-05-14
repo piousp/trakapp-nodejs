@@ -25,6 +25,7 @@ router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio);
 router.post("/cambiarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
 router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
+router.post("/verificarPasswordCorrecto/movil", estaAutorizado, verificarPasswordCorrectoMovil);
 router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
 router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
 
@@ -187,6 +188,10 @@ function verificarPasswordCorrecto(req, res) {
   return loginGenerico(comunUsuario, { _id: req.usuario })(req, res);
 }
 
+function verificarPasswordCorrectoMovil(req, res) {
+  return loginGenerico(comunEmpleado, { _id: req.usuario })(req, res);
+}
+
 function loginGenerico(coleccion, queryUsuario) {
   return async function loginGenericoInterno(req, res) {
     debug("loginGenerico");
@@ -194,6 +199,7 @@ function loginGenerico(coleccion, queryUsuario) {
       const usuario = await coleccion.findOneFat(null, queryUsuario);
       if (usuario) {
         debug("Usuario obtenido");
+        delete usuario.password;
         const token = await validarPassword(usuario, req.body.password);
         return res.send(token);
       }
