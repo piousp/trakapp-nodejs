@@ -1,19 +1,19 @@
 import express from "express";
 import D from "debug";
 import modelo from "../modelos/empleado.js";
-import { getID, getBase, putID, deleteID, error } from "./_base";
+import { getBase, putID, deleteID, error } from "./_base";
 import funBD from "../comun-db.js";
 import enviarCorreo from "../../util/correos";
 
 const debug = D("ciris:rutas/empleado.js");
 
 const router = express.Router();
-getID(router, modelo);
 getBase(router, modelo);
 putID(router, modelo);
 deleteID(router, modelo);
 
 router.post("/", postBase);
+router.get("/yo", getYo);
 
 function postBase(req, res) {
   debug("Post base");
@@ -52,6 +52,11 @@ function generarPassword(cant) {
   return Array(cant)
     .fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
     .map(arr => arr[Math.floor(Math.random() * arr.length)]).join("");
+}
+
+async function getYo(req, res) {
+  const resp = await modelo.findOne({ _id: req.usuario }, { password: 0 });
+  res.json(resp);
 }
 
 export default router;
