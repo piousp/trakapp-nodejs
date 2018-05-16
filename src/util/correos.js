@@ -5,7 +5,7 @@ import MG from "mailgun-js";
 import util from "util";
 import entorno from "../entorno.js";
 
-const debug = D("ciris:rest/login/emailPass.js");
+const debug = D("ciris:util/correos.js");
 
 const apiKey = entorno.API_KEY;
 const domain = entorno.DOMAIN;

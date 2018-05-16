@@ -17,6 +17,10 @@ const esquema = new mongoose.Schema({
     type: String,
     default: "movil123",
   },
+  device: {
+    token: String,
+    platform: String,
+  },
   ubicacion: {
     pos: {
       type: mongoose.Schema.Types.Point,

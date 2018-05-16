@@ -5,7 +5,7 @@ import mensaje from "../modelos/mensaje.js";
 import funDB from "../comun-db.js";
 import { error } from "./_base";
 
-const debug = D("ciris:mensajes");
+const debug = D("ciris:rutas/mensaje.js");
 const router = express.Router();
 const comun = funDB(mensaje);
 
