@@ -22,14 +22,14 @@ deleteID(router, tarea);
 
 const jsonNvaTarea = {
   notification: {
-    title: "Nueva Tarea",
-    body: "Se le asignó una nueva tarea",
+    title: "Nueva tarea",
+    body: "Se le asignó una nueva tarea.",
   },
   android: {
     ttl: 3600 * 1000, // 1 hour in milliseconds
     priority: "high",
     notification: {
-      title: "Nueva Tarea",
+      title: "Nueva tarea",
       body: "Se le asignó una nueva tarea.",
       color: "#228B22",
       sound: "default",
