@@ -1,11 +1,14 @@
 import express from "express";
 import orderBy from "lodash/orderBy";
+import cloneDeep from "lodash/cloneDeep";
+import assign from "lodash/assign";
 import D from "debug";
 import mensaje from "../modelos/mensaje.js";
 import funDB from "../comun-db.js";
+import { enviarPush } from "../../util/pushNotifications";
 import { error } from "./_base";
 
-const debug = D("ciris:mensajes");
+const debug = D("ciris:rutas/mensaje.js");
 const router = express.Router();
 const comun = funDB(mensaje);
 
@@ -13,11 +16,33 @@ router.get("/privado/:receptor", getPrivado);
 router.get("/publico/", getPublico);
 router.post("/", postBase);
 
+const jsonNvoChat = {
+  notification: {
+    title: "Nuevo mensaje",
+    body: "Recibió un mensaje nuevo.",
+  },
+  android: {
+    ttl: 3600 * 1000, // 1 hour in milliseconds
+    priority: "high",
+    notification: {
+      title: "Nuevo mensaje",
+      body: "Recibió un mensaje nuevo.",
+      color: "#228B22",
+      sound: "default",
+      tag: "chat",
+    },
+  },
+};
+
 async function postBase(req, res) {
   req.body.cuenta = req.cuenta;
   try {
     const nuevoDoc = await comun.create(req.body);
-    const docPopulado = await mensaje.findOne({ _id: nuevoDoc._id }).populate("emisor").lean();
+    const docPopulado = await mensaje.findOne({ _id: nuevoDoc._id }).populate("emisor receptor").lean();
+    if (docPopulado.modelo === "usuario" && docPopulado.receptor.device) {
+      const temp = assign(cloneDeep(jsonNvoChat), { token: docPopulado.receptor.device.token });
+      await enviarPush(temp);
+    }
     return res.send(docPopulado);
   } catch (e) {
     return error(res);

@@ -8,12 +8,14 @@ import tareas from "./rest/rutas/tarea.js";
 import mensajes from "./rest/rutas/mensaje.js";
 import usuarios from "./rest/rutas/usuario.js";
 import recuperaciones from "./rest/rutas/recuperacion.js";
+import firebaseAdmin from "./util/pushNotifications";
 
 const debug = D("ciris:index.js");
 
 servidor((app) => {
   debug("Inicializando las rutas");
   socket(app);
+  firebaseAdmin();
   app.use("/api/auth", emailPass);
   app.use("/api/recuperacion", recuperaciones);
   app.use("/api/empleado", estaAutorizado, empleados);
