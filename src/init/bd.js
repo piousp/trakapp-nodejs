@@ -9,7 +9,7 @@ export default initDB;
 function initDB() {
   debug(`Inicializando la conexión con la base de datos a ${entorno.MONGO_URI}`);
   mongoose.connect(entorno.MONGO_URI);
-  mongoose.set("debug", !entorno.PRODUCCION);
+  mongoose.set("debug", false); //! entorno.PRODUCCION);
 
   const db = mongoose.connection;
   db.on("error", (error) => {

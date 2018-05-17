@@ -28,7 +28,7 @@ async function getConMensajes(req, res) {
     e.cantMensajesNoVistos = cant;
     return e;
   }
-  const empleados = await modelo.find().lean();
+  const empleados = await modelo.find({ cuenta: req.cuenta, borrado: false }).lean();
   const empleadosConMensajes = await Promise.all(map(empleados, e => getCantMensajesNoVistos(e)));
   return res.json({ docs: empleadosConMensajes });
 }

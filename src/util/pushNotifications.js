@@ -17,8 +17,8 @@ async function enviarPush(data) {
   debug("Enviando push");
   debug(data);
   return admin.messaging().send(data)
-    .then(response => console.log("Successfully sent message:", response))
-    .catch(error => console.log("Error sending message:", error));
+    .then(response => debug("Successfully sent message:", response))
+    .catch(error => debug("Error sending message:", error));
 }
 
 export default iniciarFireBase;
