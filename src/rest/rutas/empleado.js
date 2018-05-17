@@ -1,6 +1,8 @@
 import express from "express";
 import D from "debug";
+import map from "lodash/map";
 import modelo from "../modelos/empleado.js";
+import mensaje from "../modelos/mensaje";
 import { getBase, putID, deleteID, error } from "./_base";
 import funBD from "../comun-db.js";
 import enviarCorreo from "../../util/correos";
@@ -14,6 +16,22 @@ deleteID(router, modelo);
 
 router.post("/", postBase);
 router.get("/yo", getYo);
+router.get("/conmensajes", getConMensajes);
+
+async function getConMensajes(req, res) {
+  async function getCantMensajesNoVistos(e) {
+    const cant = await mensaje.find({
+      emisor: e._id,
+      receptor: req.usuario,
+      visto: false,
+    }).count();
+    e.cantMensajesNoVistos = cant;
+    return e;
+  }
+  const empleados = await modelo.find().lean();
+  const empleadosConMensajes = await Promise.all(map(empleados, e => getCantMensajesNoVistos(e)));
+  return res.json({ docs: empleadosConMensajes });
+}
 
 function postBase(req, res) {
   debug("Post base");

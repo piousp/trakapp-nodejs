@@ -6,7 +6,8 @@ import D from "debug";
 import mensaje from "../modelos/mensaje.js";
 import funDB from "../comun-db.js";
 import { enviarPush } from "../../util/pushNotifications";
-import { error } from "./_base";
+import { ok, error } from "./_base";
+import empleado from "../modelos/empleado.js";
 
 const debug = D("ciris:rutas/mensaje.js");
 const router = express.Router();
@@ -15,6 +16,7 @@ const comun = funDB(mensaje);
 router.get("/privado/:receptor", getPrivado);
 router.get("/publico/", getPublico);
 router.post("/", postBase);
+router.put("/marcarvistos/:emisor", marcarVistos);
 
 const jsonNvoChat = {
   notification: {
@@ -38,11 +40,14 @@ async function postBase(req, res) {
   req.body.cuenta = req.cuenta;
   try {
     const nuevoDoc = await comun.create(req.body);
-    const docPopulado = await mensaje.findOne({ _id: nuevoDoc._id }).populate("emisor receptor").lean();
-    if (docPopulado.modelo === "usuario" && docPopulado.receptor.device) {
-      const temp = assign(cloneDeep(jsonNvoChat), { token: docPopulado.receptor.device.token });
-      await enviarPush(temp);
+    if (nuevoDoc.modelo === "usuario") {
+      const receptor = await empleado.findOne({ _id: nuevoDoc.receptor }).lean();
+      if (receptor.device) {
+        const temp = assign(cloneDeep(jsonNvoChat), { token: receptor.device.token });
+        enviarPush(temp);
+      }
     }
+    const docPopulado = await mensaje.findOne({ _id: nuevoDoc._id }).populate("emisor").lean();
     return res.send(docPopulado);
   } catch (e) {
     return error(res);
@@ -88,6 +93,18 @@ async function getMensajes(query, paginacion) {
   } catch (e) {
     return e;
   }
+}
+
+function marcarVistos(req, res) {
+  const query = {
+    emisor: req.params.emisor,
+    receptor: req.usuario,
+    visto: false,
+  };
+  return mensaje
+    .update(query, { visto: true }, { multi: true })
+    .then(ok(res))
+    .catch(error(res));
 }
 
 export default router;
