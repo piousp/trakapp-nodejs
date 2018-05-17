@@ -3,7 +3,7 @@ import orderBy from "lodash/orderBy";
 import D from "debug";
 import mensaje from "../modelos/mensaje.js";
 import funDB from "../comun-db.js";
-import { error } from "./_base";
+import { ok, error } from "./_base";
 
 const debug = D("ciris:mensajes");
 const router = express.Router();
@@ -12,6 +12,7 @@ const comun = funDB(mensaje);
 router.get("/privado/:receptor", getPrivado);
 router.get("/publico/", getPublico);
 router.post("/", postBase);
+router.put("/marcarvistos/:emisor", marcarVistos);
 
 async function postBase(req, res) {
   req.body.cuenta = req.cuenta;
@@ -63,6 +64,18 @@ async function getMensajes(query, paginacion) {
   } catch (e) {
     return e;
   }
+}
+
+function marcarVistos(req, res) {
+  const query = {
+    emisor: req.params.emisor,
+    receptor: req.usuario,
+    visto: false,
+  };
+  return mensaje
+    .update(query, { visto: true }, { multi: true })
+    .then(ok(res))
+    .catch(error(res));
 }
 
 export default router;

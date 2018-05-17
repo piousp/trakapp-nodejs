@@ -24,6 +24,10 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   modelo: String,
+  visto: {
+    type: Boolean,
+    default: false,
+  },
   borrado: {
     type: Boolean,
     default: false,
