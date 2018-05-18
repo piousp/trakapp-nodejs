@@ -40,7 +40,7 @@ async function postBase(req, res) {
   req.body.cuenta = req.cuenta;
   try {
     const nuevoDoc = await comun.create(req.body);
-    if (nuevoDoc.modelo === "usuario") {
+    if (nuevoDoc.receptor && nuevoDoc.modelo === "usuario") {
       const receptor = await empleado.findOne({ _id: nuevoDoc.receptor }).lean();
       if (receptor.device) {
         const temp = assign(cloneDeep(jsonNvoChat), { token: receptor.device.token });
@@ -70,7 +70,11 @@ async function getPrivado(req, res) {
 
 async function getPublico(req, res) {
   try {
-    const msjs = await getMensajes({ borrado: false, receptor: { $exists: false } }, req.query);
+    const msjs = await getMensajes({
+      borrado: false,
+      receptor: { $exists: false },
+      cuenta: req.cuenta,
+    }, req.query);
     return res.send(msjs);
   } catch (e) {
     return error(res);

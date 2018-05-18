@@ -30,7 +30,7 @@ async function encriptar(password) {
 
 async function encriptarPasswordModelo(modelo, next) {
   try {
-    modelo.password = encriptar(modelo.password);
+    modelo.password = await encriptar(modelo.password);
     return next();
   } catch (err) {
     return next(err);
