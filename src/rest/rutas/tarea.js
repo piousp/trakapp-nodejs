@@ -41,20 +41,17 @@ const jsonNvaTarea = {
 async function postTarea(req, res) {
   debug("postTarea");
   req.body.cuenta = req.cuenta;
-  comun.create(req.body)
-    .then(async (resp) => {
-      try {
-        const objEmpleado = await empleado.findOne({ _id: resp.empleado }).lean();
-        if (objEmpleado.device && objEmpleado.device.token && objEmpleado.device.platform) {
-          const temp = assign(cloneDeep(jsonNvaTarea), { token: objEmpleado.device.token });
-          await enviarPush(temp);
-        }
-        return ok(res);
-      } catch (e) {
-        return error(res);
-      }
-    })
-    .catch(error(res));
+  try {
+    const objTarea = await comun.create(req.body);
+    const objEmpleado = await empleado.findOne({ _id: objTarea.empleado }).lean();
+    if (objEmpleado.device && objEmpleado.device.token && objEmpleado.device.platform) {
+      const temp = assign(cloneDeep(jsonNvaTarea), { token: objEmpleado.device.token });
+      enviarPush(temp);
+    }
+    return res.json(objTarea);
+  } catch (e) {
+    return error(e);
+  }
 }
 
 function getTareasEmpleado(req, res) {
