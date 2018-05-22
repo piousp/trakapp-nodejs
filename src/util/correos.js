@@ -2,7 +2,6 @@ import D from "debug";
 import cloneDeep from "lodash/cloneDeep";
 import assign from "lodash/assign";
 import MG from "mailgun-js";
-import util from "util";
 import entorno from "../entorno.js";
 
 const debug = D("ciris:util/correos.js");
@@ -21,9 +20,7 @@ async function enviarCorreo(pdata) {
   debug("Enviando correo");
   debug(pdata);
   const data = assign(cloneDeep(tmpData), pdata);
-  const mgp = util.promisify(mailgun.messages().send);
-  const resp = await mgp(data);
-  return resp;
+  return mailgun.messages().send(data).then(resp => resp).catch(err => debug(err));
 }
 
 export default enviarCorreo;
