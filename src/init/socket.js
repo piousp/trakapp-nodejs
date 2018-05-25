@@ -19,7 +19,7 @@ function configurarOyentes(socketo) {
       dispositivo.username = usuario._id;
       const resp = await actualizarPosicion(usuario);
       debug("resp", JSON.stringify(resp));
-      return socketo.sockets.emit("actualizarPosicion", resp);
+      return socketo.sockets.emit("actualizar", resp);
     });
     dispositivo.on("sesionIniciada", (usuario) => {
       dispositivo.username = usuario._id;
@@ -37,7 +37,7 @@ function configurarOyentes(socketo) {
 }
 
 async function actualizarPosicion(data) {
-  const nvaFecha = moment(data.ubicacion.lastUpdate, "YYYY-MM-DDTHH:mm:ss.SSSSZ").add(5, "m");
+  const nvaFecha = moment(data.ubicacion.lastUpdate, "YYYY-MM-DDTHH:mm:ss.SSSSZ").add(1, "m");
   const pos = {
     type: "Point",
     coordinates: data.ubicacion.pos.coordinates,
@@ -54,6 +54,7 @@ async function actualizarPosicion(data) {
     try {
       const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
       delete empResp.password;
+      debug("***UBICACIÓN ACTUALIZADA***");
       return empResp;
     } catch (err) {
       debug("Estalló:", err);
