@@ -17,6 +17,7 @@ function configurarOyentes(socketo) {
     dispositivo.on("actualizarPosicion", async (usuario) => {
       debug("evento de actualizarPosicion con el id", usuario._id);
       dispositivo.username = usuario._id;
+      debug("actualizarPosicion", usuario.ubicacion.pos.coordinates);
       const resp = await actualizarPosicion(usuario);
       debug("resp", JSON.stringify(resp));
       return socketo.sockets.emit("actualizar", resp);
