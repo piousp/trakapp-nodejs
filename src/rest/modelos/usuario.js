@@ -8,6 +8,7 @@ const esquema = new mongoose.Schema({
   },
   apellidos: {
     type: String,
+    required: true,
   },
   correo: {
     type: String,
@@ -22,6 +23,10 @@ const esquema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "cuenta",
     required: true,
+  },
+  activo: {
+    type: Boolean,
+    default: false,
   },
   borrado: {
     type: Boolean,

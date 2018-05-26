@@ -9,7 +9,7 @@ import funBD from "../comun-db.js";
 import modeloRecu from "../modelos/recuperacion.js";
 import { ErrorMongo, UsuarioInvalido } from "../../util/errores.js";
 import { encriptar } from "../modelos/encriptador.js";
-
+import entorno from "../../entorno.js";
 import enviarCorreo from "../../util/correos.js";
 
 const debug = D("ciris:rest/login/emailPass.js");
@@ -28,10 +28,11 @@ router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorre
 router.post("/verificarPasswordCorrecto/movil", estaAutorizado, verificarPasswordCorrectoMovil);
 router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
 router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
+router.get("/activacion/:id", activarCuenta);
 
 function login(coleccion) {
   return (req, res) => {
-    const query = { correo: req.body.login, borrado: false };
+    const query = { correo: req.body.login, borrado: false, activo: true };
     return loginGenerico(coleccion, query)(req, res);
   };
 }
@@ -47,7 +48,20 @@ async function registrar(req, res) {
     const cuenta = await crearCuenta(req.body);
     const usuario = await crearUsuario(req.body, cuenta._id);
     debug("Usuario creado");
-    return res.send(usuario);
+    res.send(usuario);
+    return enviarCorreo({
+      to: usuario.usuario.correo,
+      subject: "Confirme su cuenta",
+      html: `
+        <div>
+          <h1>Hola, ${usuario.usuario.nombre}</h1>
+          <p>Para activar su cuenta, haga click en el siguiente enlace:</p>
+          <a href='${entorno.ORIGIN}/activacion/${usuario.usuario._id}'>
+            ${entorno.ORIGIN}/activacion/${usuario.usuario._id}
+          </a>
+        </div>
+      `,
+    });
   } catch (err) {
     debug(err);
     if (err instanceof UsuarioInvalido) {
@@ -81,6 +95,7 @@ async function crearUsuario(data, idCuenta) {
   debug("Creando usuario");
   const nuevoUsuario = {
     nombre: data.nombre,
+    apellidos: data.apellidos,
     correo: data.correo,
     password: data.password,
     cuenta: idCuenta,
@@ -123,7 +138,7 @@ async function solicitarCambio(req, res) {
     debug("Creando recuperación");
     const recu = await funBD(modeloRecu).create({ idUsuario: usuario._id, horaCreacion: moment() });
     const link = "Haga clic aqui para reestablecer su contraseña"
-      .link(`http://trakapp.ciriscr.com/recuperacion/${recu._id}`);
+      .link(`${entorno.ORIGIN}/recuperacion/${recu._id}`);
     const data = {
       to: usuario.correo,
       subject: "Recuperación de cuenta",
@@ -246,6 +261,25 @@ function cambiarContrasena(coleccion) {
 async function existeUsuario(correo) {
   const conteo = await funBD(modeloUsuario).count({ correo, borrado: false });
   return conteo > 0;
+}
+
+async function activarCuenta(req, res) {
+  try {
+    const usuario = await comunUsuario.findOne(null, { _id: req.params.id });
+    if (!usuario) {
+      return res.send("La cuenta que intenta activar no existe.");
+    }
+    if (usuario.activo) {
+      return res.send("Esta cuenta ya fue verificada y se encuentra activa.");
+    }
+    await comunUsuario.updateOne(req.params.id, { activo: true });
+    return res.json("Su cuenta ha sido verificada existosamente.");
+  } catch (err) {
+    if (err instanceof ErrorMongo) {
+      return res.status(500).send(err.message);
+    }
+    return res.status(503).send(err.message);
+  }
 }
 
 export default router;

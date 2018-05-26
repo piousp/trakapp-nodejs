@@ -23,6 +23,7 @@ async function revisarPorRoot() {
       password: "rastreadorRootCiris",
       nombre: "root",
       cuenta: new mongoose.Types.ObjectId(),
+      activo: true,
     };
     const nuevoRoot = await comun.create(usuarioRoot);
     if (nuevoRoot._id) {
