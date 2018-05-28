@@ -22,11 +22,13 @@ const comunCuenta = funBD(modeloCuenta);
 router.post("/login/movil", login(comunEmpleado));
 router.post("/login", login(comunUsuario));
 router.post("/registro", registrar);
-router.post("/solicitarCambio/movil", solicitarCambio);
+router.post("/solicitarCambio/movil", solicitarCambio(comunEmpleado, true));
+router.post("/solicitarCambio/", solicitarCambio(comunUsuario, false));
 router.post("/cambiarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
+router.post("/cambiarContrasena/:id", recuperarContrasena(comunUsuario));
 router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
 router.post("/verificarPasswordCorrecto/movil", estaAutorizado, verificarPasswordCorrectoMovil);
-router.post("/cambiarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
+router.post("/actualizarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
 router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
 router.get("/activacion/:id", activarCuenta);
 
@@ -126,39 +128,42 @@ function crearCuenta(data) {
   return comunCuenta.create(cuenta);
 }
 
-async function solicitarCambio(req, res) {
-  debug("Solicitar cambio de password");
-  try {
-    debug("Buscando usuario");
-    const usuario = await comunEmpleado.findOne(null, { correo: req.body.correo });
-    if (!usuario) {
-      debug("El usuario no existe");
-      return res.status(404).send("El usuario no existe");
+function solicitarCambio(coleccion, movil) {
+  return async (req, res) => {
+    debug("Solicitar cambio de password");
+    try {
+      debug("Buscando usuario");
+      const usuario = await coleccion.findOne(null, { correo: req.body.correo });
+      if (!usuario) {
+        debug("El usuario no existe");
+        return res.status(404).send("El usuario no existe");
+      }
+      debug("Creando recuperación");
+      const recu = await funBD(modeloRecu)
+        .create({ idUsuario: usuario._id, horaCreacion: moment(), movil });
+      const link = "Haga clic aqui para reestablecer su contraseña"
+        .link(`http://trakapp.ciriscr.com/recuperacion/${recu._id}`);
+      const data = {
+        to: usuario.correo,
+        subject: "Recuperación de cuenta",
+        html: "<div>" +
+          `<h1>Hola, ${usuario.nombre}</h1>` +
+          `<p>Este correo fue generado porque se solicitó una recuperación de cuenta. Por favor haga clic en el siguiente link para reestablecer la contraseña (Este link es valido por 24h)</p><br>${link
+          }<br><p>Si ud no solicitó este correo, haga caso omiso.</p>` +
+        "</div>",
+      };
+      debug("Recuperación creada, enviando");
+      const resp = await enviarCorreo(data);
+      debug(resp);
+      return res.status(200).send("Se envió el correo para realizar el cambio de contraseña");
+    } catch (err) {
+      debug(err);
+      if (err instanceof ErrorMongo) {
+        return res.status(500).send(err.message);
+      }
+      return res.status(503).send(err.message);
     }
-    debug("Creando recuperación");
-    const recu = await funBD(modeloRecu).create({ idUsuario: usuario._id, horaCreacion: moment() });
-    const link = "Haga clic aqui para reestablecer su contraseña"
-      .link(`${entorno.ORIGIN}/recuperacion/${recu._id}`);
-    const data = {
-      to: usuario.correo,
-      subject: "Recuperación de cuenta",
-      html: "<div>" +
-        `<h1>Hola, ${usuario.nombre}</h1>` +
-        `<p>Este correo fue generado porque se solicitó una recuperación de cuenta. Por favor haga clic en el siguiente link para reestablecer la contraseña (Este link es valido por 24h)</p><br>${link
-        }<br><p>Si ud no solicitó este correo, haga caso omiso.</p>` +
-      "</div>",
-    };
-    debug("Recuperación creada, enviando");
-    const resp = await enviarCorreo(data);
-    debug(resp);
-    return res.status(200).send("Se envió el correo para realizar el cambio de contraseña");
-  } catch (err) {
-    debug(err);
-    if (err instanceof ErrorMongo) {
-      return res.status(500).send(err.message);
-    }
-    return res.status(503).send(err.message);
-  }
+  };
 }
 
 function recuperarContrasena(modelo) {
