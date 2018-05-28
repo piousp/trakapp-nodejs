@@ -17,6 +17,11 @@ const esquema = new mongoose.Schema({
     select: false,
     index: true,
   },
+  movil: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
 });
 
 const modelo = mongoose.model("recuperacion", esquema);
