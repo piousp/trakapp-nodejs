@@ -19,8 +19,8 @@ deploy_desarrollo:
     - npm install
     - npm run build
     - rsync -rlDv --delete * /software/trakapp/backend/
-    - "forever stop trakapp 2>/dev/null || :"
-    - NODE_ENV=$MODO_ST PUERTO=$PUERTO_ST ORIGIN=$ORIGIN_ST MONGO_URI=$MONGO_URI_ST forever start --append --uid trakapp /software/trakapp/backend/dist
+    - "forever stop trakapp-staging 2>/dev/null || :"
+    - NODE_ENV=$MODO_ST PUERTO=$PUERTO_ST ORIGIN=$ORIGIN_ST MONGO_URI=$MONGO_URI_ST forever start --append --uid trakapp-staging /software/trakapp/backend/dist
   environment:
     name: desarrollo
     url: trackapp.ciriscr.com:7001
@@ -33,8 +33,8 @@ deploy_estable:
     - npm install
     - npm run build
     - rsync -rlDv --delete * /software/trakapp/produccion/backend
-    - "forever stop trakapp 2>/dev/null || :"
-    - NODE_ENV=$MODO_PR PUERTO=$PUERTO_PR ORIGIN=$ORIGIN_PR MONGO_URI=$MONGO_URI_PR forever start --append --uid trakapp /software/trakapp/produccion/backend/dist
+    - "forever stop trakapp-produccion 2>/dev/null || :"
+    - NODE_ENV=$MODO_PR PUERTO=$PUERTO_PR ORIGIN=$ORIGIN_PR MONGO_URI=$MONGO_URI_PR forever start --append --uid trakapp-produccion /software/trakapp/produccion/backend/dist
   environment:
     name: estable
     url: backend.trakapp.co.cr
