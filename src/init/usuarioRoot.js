@@ -22,6 +22,7 @@ async function revisarPorRoot() {
       correo: "root@ciriscr.com",
       password: "rastreadorRootCiris",
       nombre: "root",
+      apellidos: "ROOT",
       cuenta: new mongoose.Types.ObjectId(),
       activo: true,
     };
