@@ -26,3 +26,17 @@ deploy_desarrollo:
     url: trackapp.ciriscr.com:7001
   only:
   - desarrollo
+
+deploy_estable:
+  stage: deploy
+  script:
+    - npm install
+    - npm run build
+    - rsync -rlDv --delete * /software/trakapp/produccion/backend
+    - "forever stop trakapp 2>/dev/null || :"
+    - NODE_ENV=$MODO PUERTO=$PUERTO ORIGIN=$ORIGIN MONGO_URI=$MONGO_URI forever start --append --uid trakapp /software/trakapp/produccion/backend/dist
+  environment:
+    name: estable
+    url: backend.trakapp.co.cr
+  only:
+  - estable
