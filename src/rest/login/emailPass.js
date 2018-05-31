@@ -19,8 +19,8 @@ const comunUsuario = funBD(modeloUsuario);
 const comunEmpleado = funBD(modeloEmpleado);
 const comunCuenta = funBD(modeloCuenta);
 
-router.post("/login/movil", login(comunEmpleado));
-router.post("/login", login(comunUsuario));
+router.post("/login/movil", login(comunEmpleado, false));
+router.post("/login", login(comunUsuario, true));
 router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio(comunEmpleado, true));
 router.post("/solicitarCambio/", solicitarCambio(comunUsuario, false));
@@ -32,9 +32,12 @@ router.post("/actualizarContrasena", estaAutorizado, cambiarContrasena(comunUsua
 router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
 router.get("/activacion/:id", activarCuenta);
 
-function login(coleccion) {
+function login(coleccion, esUsuario) {
   return (req, res) => {
-    const query = { correo: req.body.login, borrado: false, activo: true };
+    const query = { correo: req.body.login, borrado: false };
+    if (esUsuario) {
+      query.activo = true;
+    }
     return loginGenerico(coleccion, query)(req, res);
   };
 }
