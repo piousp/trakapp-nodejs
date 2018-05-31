@@ -18,7 +18,7 @@ deploy_desarrollo:
   script:
     - npm install
     - npm run build
-    - rsync -rlDv --delete * /software/trakapp/backend/
+    - rsync -rlDv --delete * /software/trakapp/pruebas/backend/
     - "forever stop trakapp-staging 2>/dev/null || :"
     - NODE_ENV=$MODO_ST PUERTO=$PUERTO_ST ORIGIN=$ORIGIN_ST MONGO_URI=$MONGO_URI_ST forever start --append --uid trakapp-staging /software/trakapp/backend/dist
   environment:
