@@ -11,7 +11,7 @@ const domain = entorno.DOMAIN;
 const mailgun = MG({ apiKey, domain });
 
 const tmpData = {
-  from: `TrakApp <noreply@${entorno.DOMAIN}>`,
+  from: `Trakapp <noreply@${entorno.DOMAIN}>`,
   to: "",
   subject: "",
 };
