@@ -11,6 +11,7 @@ import { ErrorMongo, UsuarioInvalido } from "../../util/errores.js";
 import { encriptar } from "../modelos/encriptador.js";
 import entorno from "../../entorno.js";
 import enviarCorreo from "../../util/correos.js";
+import renderizarHtml from "../../util/renderizarHtml.js";
 
 const debug = D("ciris:rest/login/emailPass.js");
 const router = express.Router();
@@ -52,20 +53,19 @@ async function registrar(req, res) {
     }
     const cuenta = await crearCuenta(req.body);
     const usuario = await crearUsuario(req.body, cuenta._id);
+    const html = renderizarHtml("verificarCuenta.html", {
+      admin_url: entorno.ADMIN_URL,
+      nombre_usuario: usuario.usuario.nombre,
+      correo_usuario: usuario.usuario.correo,
+      password_usuario: req.body.password,
+      url_confirmacion: `${entorno.ADMIN_URL}/activacion/${usuario.usuario._id}`,
+    });
     debug("Usuario creado");
     res.send(usuario);
     return enviarCorreo({
       to: usuario.usuario.correo,
       subject: "Confirme su cuenta",
-      html: `
-        <div>
-          <h1>Hola, ${usuario.usuario.nombre}</h1>
-          <p>Para activar su cuenta, haga click en el siguiente enlace:</p>
-          <a href='${entorno.ORIGIN}/activacion/${usuario.usuario._id}'>
-            ${entorno.ORIGIN}/activacion/${usuario.usuario._id}
-          </a>
-        </div>
-      `,
+      html,
     });
   } catch (err) {
     debug(err);
@@ -144,16 +144,14 @@ function solicitarCambio(coleccion, movil) {
       debug("Creando recuperación");
       const recu = await funBD(modeloRecu)
         .create({ idUsuario: usuario._id, horaCreacion: moment(), movil });
-      const link = "Haga clic aqui para reestablecer su contraseña"
-        .link(`http://trakapp.ciriscr.com/recuperacion/${recu._id}`);
+      const html = renderizarHtml("recuperarContrasena.html", {
+        url_recuperacion: `${entorno.ADMIN_URL}/recuperacion/${recu._id}`,
+        admin_url: entorno.ADMIN_URL,
+      });
       const data = {
         to: usuario.correo,
-        subject: "Recuperación de cuenta",
-        html: "<div>" +
-          `<h1>Hola, ${usuario.nombre}</h1>` +
-          `<p>Este correo fue generado porque se solicitó una recuperación de cuenta. Por favor haga clic en el siguiente link para reestablecer la contraseña (Este link es valido por 24h)</p><br>${link
-          }<br><p>Si ud no solicitó este correo, haga caso omiso.</p>` +
-        "</div>",
+        subject: "Recuperación de contraseña",
+        html,
       };
       debug("Recuperación creada, enviando");
       const resp = await enviarCorreo(data);
@@ -195,7 +193,7 @@ function recuperarContrasena(modelo) {
       }
       await funBD(modeloRecu).efectuarCambio(req.params.id, { $set: { activo: false } });
       debug("Se cambió exitosamente la contraseña");
-      return res.status(200).send("Se cambió exitaosamente la contraseña");
+      return res.status(200).send("Se cambió exitosamente la contraseña");
     } catch (err) {
       debug(err);
       if (err instanceof ErrorMongo) {

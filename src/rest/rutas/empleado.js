@@ -1,11 +1,13 @@
 import express from "express";
 import D from "debug";
 import map from "lodash/map";
+import renderizarHtml from "../../util/renderizarHtml.js";
 import modelo from "../modelos/empleado.js";
 import mensaje from "../modelos/mensaje";
 import { getID, getBase, putID, deleteID, error } from "./_base";
 import funBD from "../comun-db.js";
 import enviarCorreo from "../../util/correos";
+import entorno from "../../entorno.js";
 
 const debug = D("ciris:rutas/empleado.js");
 
@@ -43,30 +45,18 @@ function postBase(req, res) {
   debug("Post base");
   req.body.password = generarPassword(5);
   req.body.cuenta = req.cuenta;
+  const html = renderizarHtml("bienvenidoEmpleado.html", {
+    admin_url: entorno.ADMIN_URL,
+    correo_empleado: req.body.correo,
+    password_empleado: req.body.password,
+  });
   funBD(modelo).create(req.body)
     .then((obj) => {
       res.json(obj);
       return enviarCorreo({
         to: req.body.correo,
-        subject: "Credenciales de Trakapp",
-        html: `
-          <div>
-            <h1>Hola, ${req.body.nombre}</h1>
-            <p>Su cuenta ha sido creada exitosamente y ya puede ingresar a ella con los siguientes credenciales:</p>
-            <table>
-              <tbody>
-                <tr>
-                  <td><strong>Correo:</strong></td>
-                  <td>${req.body.correo}</td>
-                </tr>
-                <tr>
-                  <td><strong>Contraseña:</strong></td>
-                  <td>${req.body.password}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        `,
+        subject: "Bienvenido a Trakapp!",
+        html,
       });
     })
     .catch(error(res));
@@ -74,7 +64,7 @@ function postBase(req, res) {
 
 function generarPassword(cant) {
   return Array(cant)
-    .fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+    .fill("23456789ABCDEFGHJKLMNPQRSTUVWXYZ")
     .map(arr => arr[Math.floor(Math.random() * arr.length)]).join("");
 }
 
