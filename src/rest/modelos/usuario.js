@@ -28,6 +28,10 @@ const esquema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  tourVisto: {
+    type: Boolean,
+    default: false,
+  },
   borrado: {
     type: Boolean,
     default: false,
