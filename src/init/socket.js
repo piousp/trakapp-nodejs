@@ -2,6 +2,7 @@ import D from "debug";
 import io from "socket.io";
 import moment from "moment";
 import filter from "lodash/filter";
+import find from "lodash/find";
 import forEach from "lodash/forEach";
 import entorno from "../entorno.js";
 import funBD from "../rest/comun-db.js";
@@ -20,10 +21,13 @@ function configurarOyentes(socketo) {
       debug("actualizarPosicion", usuario.ubicacion.pos.coordinates);
       const resp = await actualizarPosicion(usuario);
       debug("resp", JSON.stringify(resp));
-      return socketo.sockets.emit("actualizar", resp);
+      const yo = find(socketo.sockets.sockets, { username: usuario._id });
+      yo.emit("actualizar", resp);
+      return socketo.to(usuario.cuenta).emit("actualizar", resp);
     });
     dispositivo.on("sesionIniciada", (usuario) => {
       dispositivo.username = usuario._id;
+      dispositivo.join(usuario.cuenta);
       debug(`El usuario con el id ${usuario._id} se ha conectado`);
     });
     dispositivo.on("mensajeEnviado", (mensaje) => {
