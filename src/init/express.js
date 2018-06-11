@@ -5,8 +5,9 @@ import D from "debug";
 import flow from "lodash/flow";
 import size from "lodash/size";
 import invokeMap from "lodash/invokeMap";
-import entorno from "../entorno.js";
-import initDB from "./bd.js";
+import entorno from "../entorno";
+import initDB from "./bd";
+import bugsnag from "./bugsnag";
 import pkgJson from "../../package.json";
 
 const debug = D("ciris:init/express.js");
@@ -16,7 +17,13 @@ const origenes = procesarOrigenes(entorno.ORIGIN);
 export default function initApp(configRutas) {
   debug("Booteando...");
   initDB();
-  const pipe = flow([configurarCors, configurarBodyParse, configRutas, rutasBase]);
+  const pipe = flow([
+    configurarCors,
+    configurarBodyParse,
+    configurarBugsnag,
+    configRutas,
+    rutasBase,
+  ]);
   return pipe(express());
 }
 
@@ -30,6 +37,13 @@ function configurarCors(app) {
   const corsIns = cors(corsOptions);
   app.options("*", corsIns);
   app.use(corsIns);
+  return app;
+}
+
+function configurarBugsnag(app) {
+  debug("Inyectando el middle de bugsnag");
+  app.use(bugsnag.requestHandler);
+  app.use(bugsnag.errorHandler);
   return app;
 }
 

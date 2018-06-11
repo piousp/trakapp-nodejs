@@ -1,6 +1,7 @@
 import isEmpty from "lodash/isEmpty";
 import D from "debug";
 import funDB from "../comun-db.js";
+import bugsnag from "../../init/bugsnag";
 
 const debug = D("ciris:rest/rutas/_base.js");
 
@@ -100,6 +101,7 @@ function ok(res) {
 
 function error(res) {
   return (err) => {
+    bugsnag.notify(new Error(err));
     if (isEmpty(err)) {
       return res.status(200).send({});
     }
