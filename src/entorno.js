@@ -9,4 +9,5 @@ export default {
   API_KEY: process.env.MAILGUN_API_KEY || "key-d49308b677d961109141b24ef95b6722",
   DOMAIN: process.env.MAILGUN_DOMAIN || "trakapp.ciriscr.com",
   ADMIN_URL: process.env.ADMIN_URL || "http://localhost:3000",
+  BUGSNAG_STAGE: process.env.BUGSNAG_STAGE || "development",
 };

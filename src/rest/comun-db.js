@@ -2,6 +2,7 @@ import isEmpty from "lodash/isEmpty";
 import D from "debug";
 import curry from "lodash/curry";
 import { ErrorMongo } from "../util/errores";
+import bugsnag from "../init/bugsnag";
 
 const debug = D("ciris:rest/comun-db.js");
 
@@ -61,6 +62,7 @@ async function find(modelo, pquery, pagination, populate) {
     };
   } catch (err) {
     debug(err);
+    bugsnag.notify(new ErrorMongo(`mensajeError: ${err}`));
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }
@@ -154,6 +156,7 @@ async function agregarCatch(promesa) {
     return await promesa;
   } catch (err) {
     debug("Error procesando cmd mongo", err);
+    bugsnag.notify(new ErrorMongo(`mensajeError: ${err}`));
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }
@@ -169,6 +172,7 @@ async function procesarBusqueda(query) {
     return resp;
   } catch (err) {
     debug(err);
+    bugsnag.notify(new ErrorMongo(`mensajeError: ${err}`));
     throw new ErrorMongo(`mensajeError: ${err}`);
   }
 }
