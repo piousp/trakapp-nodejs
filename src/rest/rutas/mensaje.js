@@ -8,6 +8,7 @@ import funDB from "../comun-db.js";
 import { enviarPush } from "../../util/pushNotifications";
 import { ok, error } from "./_base";
 import empleado from "../modelos/empleado.js";
+import usuario from "../modelos/usuario.js";
 
 const debug = D("ciris:rutas/mensaje.js");
 const router = express.Router();
@@ -21,17 +22,18 @@ router.put("/marcarvistos/:emisor", marcarVistos);
 const jsonNvoChat = {
   notification: {
     title: "Nuevo mensaje",
-    body: "Recibió un mensaje nuevo.",
   },
   android: {
     ttl: 3600 * 1000, // 1 hour in milliseconds
     priority: "high",
     notification: {
       title: "Nuevo mensaje",
-      body: "Recibió un mensaje nuevo.",
       color: "#228B22",
       sound: "default",
       tag: "chat",
+    },
+    data: {
+      tipo: "chat",
     },
   },
 };
@@ -42,8 +44,12 @@ async function postBase(req, res) {
     const nuevoDoc = await comun.create(req.body);
     if (nuevoDoc.receptor && nuevoDoc.modelo === "usuario") {
       const receptor = await empleado.findOne({ _id: nuevoDoc.receptor }).lean();
+      const emisor = await usuario.findOne({ _id: nuevoDoc.emisor }).lean();
       if (receptor.device) {
         const temp = assign(cloneDeep(jsonNvoChat), { token: receptor.device.token });
+        const body = `Recibió un mensaje nuevo de ${emisor.nombre}`;
+        temp.notification.body = body;
+        temp.android.notification.body = body;
         enviarPush(temp);
       }
     }
@@ -105,8 +111,6 @@ function marcarVistos(req, res) {
     receptor: req.usuario,
     visto: false,
   };
-  console.log("MARCAR VISTOS");
-  console.log(query);
   return mensaje
     .update(query, { visto: true }, { multi: true })
     .then(ok(res))
