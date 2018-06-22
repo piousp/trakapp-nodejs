@@ -105,6 +105,8 @@ function marcarVistos(req, res) {
     receptor: req.usuario,
     visto: false,
   };
+  console.log("MARCAR VISTOS");
+  console.log(query);
   return mensaje
     .update(query, { visto: true }, { multi: true })
     .then(ok(res))
