@@ -28,6 +28,8 @@ const esquema = new mongoose.Schema({
     ref: "cuenta",
     required: true,
   },
+  horaInicio: Date,
+  horaFin: Date,
   borrado: {
     type: Boolean,
     default: false,

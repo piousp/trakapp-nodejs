@@ -1,5 +1,6 @@
 import D from "debug";
 import express from "express";
+import moment from "moment";
 import cloneDeep from "lodash/cloneDeep";
 import assign from "lodash/assign";
 import tarea from "../modelos/tarea.js";
@@ -16,6 +17,7 @@ router.get("/empleado/:id", getTareasEmpleado);
 getID(router, tarea, "cuenta");
 router.get("/", getBase);
 router.put("/completar/:id", completar);
+router.put("/iniciar/:id", iniciar);
 putID(router, tarea);
 router.post("/", postTarea);
 deleteID(router, tarea);
@@ -85,7 +87,13 @@ function getBase(req, res) {
 }
 
 function completar(req, res) {
-  comun.efectuarCambio(req.params.id, { $set: { activa: false } })
+  comun.efectuarCambio(req.params.id, { $set: { activa: false, horaFin: moment() } })
+    .then(ok(res))
+    .catch(error(res));
+}
+
+function iniciar(req, res) {
+  comun.efectuarCambio(req.params.id, { $set: { horaInicio: moment() } })
     .then(ok(res))
     .catch(error(res));
 }
