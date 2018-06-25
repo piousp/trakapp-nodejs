@@ -35,6 +35,9 @@ const jsonNvaTarea = {
       sound: "default",
       tag: "tarea",
     },
+    data: {
+      tipo: "tarea",
+    },
   },
 };
 

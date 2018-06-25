@@ -1,7 +1,9 @@
 import express from "express";
 import D from "debug";
+import map from "lodash/map";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloCuenta from "../modelos/cuenta.js";
+import mensaje from "../modelos/mensaje";
 import funDB from "../comun-db.js";
 import rutasGenericas, { ok, error } from "./_base.js";
 
@@ -13,11 +15,33 @@ const comunCuenta = funDB(modeloCuenta);
 
 router.get("/yo", getYo);
 router.get("/cuenta", getCuenta);
+router.get("/conmensajes", getConMensajes);
 router.put("/cuenta", actualizarCuenta);
+
 
 rutasGenericas(router, modeloUsuario);
 
 export default router;
+
+async function getConMensajes(req, res) {
+  async function getCantMensajesNoVistos(e) {
+    const cant = await mensaje.find({
+      emisor: e._id,
+      receptor: req.usuario,
+      visto: false,
+    }).count();
+    e.cantMensajesNoVistos = cant;
+    return e;
+  }
+  const usuarios = await modeloUsuario.find({
+    cuenta: req.cuenta,
+    borrado: false,
+    activo: true,
+  }).lean();
+  const usuariosConMensajes = await Promise.all(map(usuarios, e => getCantMensajesNoVistos(e)));
+  return res.json({ docs: usuariosConMensajes });
+}
+
 
 async function getYo(req, res) {
   const resp = await comunUsuario.findOne(req.usuario);
