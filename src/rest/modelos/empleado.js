@@ -13,6 +13,21 @@ const esquema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  costoHora: {
+    type: Number,
+  },
+  horaExtra: {
+    type: Number,
+  },
+  horarios: {
+    lunes: horario(),
+    martes: horario(),
+    miercoles: horario(),
+    jueves: horario(),
+    viernes: horario(),
+    sabado: horario(),
+    domingo: horario(),
+  },
   password: {
     type: String,
     default: "movil123",
@@ -44,6 +59,13 @@ const esquema = new mongoose.Schema({
     index: true,
   },
 });
+
+function horario() {
+  return {
+    desde: Number,
+    hasta: Number,
+  };
+}
 
 esquema.pre("save", presave);
 esquema.methods.comparePassword = comparePassword;
