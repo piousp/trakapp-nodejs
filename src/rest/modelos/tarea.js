@@ -41,6 +41,11 @@ const esquema = new mongoose.Schema({
     default: true,
     index: true,
   },
+  cliente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "cliente",
+    required: true,
+  },
 });
 
 const modelo = mongoose.model("tarea", esquema);
