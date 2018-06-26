@@ -36,6 +36,10 @@ const esquema = new mongoose.Schema({
     select: false,
     index: true,
   },
+  post: {
+    apuntes: String,
+    firma: String,
+  },
   activa: {
     type: Boolean,
     default: true,
