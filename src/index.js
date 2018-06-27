@@ -8,6 +8,7 @@ import tareas from "./rest/rutas/tarea.js";
 import mensajes from "./rest/rutas/mensaje.js";
 import usuarios from "./rest/rutas/usuario.js";
 import recuperaciones from "./rest/rutas/recuperacion.js";
+import clientes from "./rest/rutas/cliente.js";
 import firebaseAdmin from "./util/pushNotifications";
 
 const debug = D("ciris:index.js");
@@ -22,5 +23,6 @@ servidor((app) => {
   app.use("/api/tarea", estaAutorizado, tareas);
   app.use("/api/mensaje", estaAutorizado, mensajes);
   app.use("/api/usuario", estaAutorizado, usuarios);
+  app.use("/api/cliente", estaAutorizado, clientes);
   return app;
 });

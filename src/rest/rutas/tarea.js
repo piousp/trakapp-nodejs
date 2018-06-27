@@ -81,7 +81,7 @@ function getBase(req, res) {
       $lte: req.query.fechaFin,
     },
   };
-  comun.find(query)
+  comun.find(query, null, "cliente")
     .then(ok(res))
     .catch(error(res));
 }
