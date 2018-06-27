@@ -87,7 +87,11 @@ function getBase(req, res) {
 }
 
 function completar(req, res) {
-  comun.efectuarCambio(req.params.id, { $set: { activa: false, horaFin: moment() } })
+  const tareatemp = req.body;
+  comun.efectuarCambio(
+    req.params.id,
+    { $set: { activa: false, horaFin: moment(), post: tareatemp.post } },
+  )
     .then(ok(res))
     .catch(error(res));
 }
