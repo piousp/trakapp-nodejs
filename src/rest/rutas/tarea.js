@@ -97,8 +97,18 @@ function getBase(req, res) {
     .catch(error(res));
 }
 
-function completar(req, res) {
+async function completar(req, res) {
   const tareatemp = req.body;
+  const tareaPopulada = await tarea
+    .findOne({ _id: tareatemp._id }, { title: 1, empleado: 1, cuenta: 1 })
+    .populate("empleado");
+  req.socketIO.to(tareaPopulada.cuenta).emit("notificarTarea", {
+    title: tareaPopulada.title,
+    empleado: {
+      nombre: tareaPopulada.empleado.nombre,
+      apellidos: tareaPopulada.empleado.apellidos,
+    },
+  });
   comun.efectuarCambio(
     req.params.id,
     { $set: { activa: false, horaFin: moment(), post: tareatemp.post } },
