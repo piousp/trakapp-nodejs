@@ -14,6 +14,7 @@ const router = express.Router();
 const comun = funDB(tarea);
 
 router.get("/empleado/:id", getTareasEmpleado);
+router.get("/lista", listarTareas);
 getID(router, tarea, "cuenta");
 router.get("/", getBase);
 router.put("/completar/:id", completar);
@@ -42,6 +43,16 @@ const jsonNvaTarea = {
     },
   },
 };
+
+async function listarTareas(req, res) {
+  try {
+    const query = { cuenta: req.cuenta, borrado: false };
+    const docs = await comun.find(query, null, "cliente empleado");
+    return res.json(docs);
+  } catch (e) {
+    return error(e);
+  }
+}
 
 async function postTarea(req, res) {
   debug("postTarea");

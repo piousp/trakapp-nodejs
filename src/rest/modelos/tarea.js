@@ -48,7 +48,6 @@ const esquema = new mongoose.Schema({
   cliente: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "cliente",
-    required: true,
   },
 });
 
