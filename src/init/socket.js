@@ -42,6 +42,7 @@ function configurarOyentes(socketo) {
 }
 
 async function actualizarPosicion(data) {
+  const usuario = await cEmpleados.findOneFat(data._id);
   const nvaFecha = moment(data.ubicacion.lastUpdate, "YYYY-MM-DDTHH:mm:ss.SSSSZ").add(1, "m");
   const pos = {
     type: "Point",
@@ -63,13 +64,13 @@ async function actualizarPosicion(data) {
       return empResp;
     } catch (err) {
       debug("Estalló:", err);
-      data.ubicacion.pos = pos;
-      return data;
+      usuario.ubicacion.pos = pos;
+      return usuario;
     }
   }
   debug("No hay que actualizar en BD. Retornando");
-  data.ubicacion.pos = pos;
-  return data;
+  usuario.ubicacion.pos = pos;
+  return usuario;
 }
 
 function iniciarOyente(app) {
