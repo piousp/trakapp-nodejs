@@ -2,7 +2,14 @@ import jwt from "jwt-simple";
 import moment from "moment";
 import entorno from "../../entorno.js";
 
-export { estaAutorizado, crearJWT };
+export { estaAutorizado, crearJWT, socketConfig };
+
+function socketConfig(socketIO) {
+  return (req, res, next) => {
+    req.socketIO = socketIO;
+    next();
+  };
+}
 
 function estaAutorizado(req, res, next) {
   if (!req.headers.authorization) {

@@ -39,6 +39,7 @@ function configurarOyentes(socketo) {
       dispositivo.broadcast.emit("recibirBroadcast", mensaje);
     });
   });
+  return socketo;
 }
 
 async function actualizarPosicion(data) {
