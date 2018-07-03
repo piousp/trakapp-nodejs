@@ -6,6 +6,7 @@ import modeloCuenta from "../modelos/cuenta.js";
 import mensaje from "../modelos/mensaje";
 import funDB from "../comun-db.js";
 import rutasGenericas, { ok, error } from "./_base.js";
+import enviarCorreo from "../../util/correos";
 
 const debug = D("ciris:rutas/usuario.js");
 
@@ -17,6 +18,7 @@ router.get("/yo", getYo);
 router.get("/cuenta", getCuenta);
 router.get("/conmensajes", getConMensajes);
 router.put("/cuenta", actualizarCuenta);
+router.post("/reportarbug", reportarBug);
 
 
 rutasGenericas(router, modeloUsuario);
@@ -59,4 +61,13 @@ async function actualizarCuenta(req, res) {
   comunCuenta.findOneAndUpdate(null, req.body, quer)
     .then(ok(res))
     .catch(error(res));
+}
+
+function reportarBug(req, res) {
+  return enviarCorreo({
+    to: "soporte@ciriscr.com",
+    from: `${req.body.usuario.nombre} ${req.body.usuario.apellidos} <${req.body.usuario.correo}>`,
+    subject: req.body.subject,
+    text: req.body.message,
+  }).then(() => res.end());
 }
