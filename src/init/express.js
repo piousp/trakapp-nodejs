@@ -42,8 +42,10 @@ function configurarCors(app) {
 
 function configurarBugsnag(app) {
   debug("Inyectando el middle de bugsnag");
-  app.use(bugsnag.requestHandler);
-  app.use(bugsnag.errorHandler);
+  if (entorno.PRODUCCION) {
+    app.use(bugsnag.requestHandler);
+    app.use(bugsnag.errorHandler);
+  }
   return app;
 }
 
