@@ -156,8 +156,8 @@ async function agregarCatch(promesa) {
     return await promesa;
   } catch (err) {
     debug("Error procesando cmd mongo", err);
-    bugsnag.notify(new ErrorMongo(`mensajeError: ${err}`));
-    throw new ErrorMongo(`mensajeError: ${err}`);
+    bugsnag.notify(new ErrorMongo(err.errmsg, err.code));
+    throw new ErrorMongo(err.errmsg, err.code);
   }
 }
 
@@ -172,7 +172,7 @@ async function procesarBusqueda(query) {
     return resp;
   } catch (err) {
     debug(err);
-    bugsnag.notify(new ErrorMongo(`mensajeError: ${err}`));
-    throw new ErrorMongo(`mensajeError: ${err}`);
+    bugsnag.notify(new ErrorMongo(err.errmsg, err.code));
+    throw new ErrorMongo(err.errmsg, err.code);
   }
 }
