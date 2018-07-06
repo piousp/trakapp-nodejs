@@ -5,7 +5,7 @@ import renderizarHtml from "../../util/renderizarHtml.js";
 import modelo from "../modelos/empleado.js";
 import mensaje from "../modelos/mensaje";
 import { getID, getBase, putID, deleteID, error } from "./_base";
-import funBD from "../comun-db.js";
+import funBD, { skipLimitABS } from "../comun-db.js";
 import enviarCorreo from "../../util/correos";
 import entorno from "../../entorno.js";
 
@@ -32,11 +32,14 @@ async function getConMensajes(req, res) {
     e.cantMensajesNoVistos = cant;
     return e;
   }
+  const abs = skipLimitABS(req.query);
   const empleados = await modelo.find({
     cuenta: req.cuenta,
     borrado: false,
-    ubicacion: { $exists: true },
-  }).lean();
+  })
+    .skip(abs.total)
+    .limit(abs.cantidad)
+    .lean();
   const empleadosConMensajes = await Promise.all(map(empleados, e => getCantMensajesNoVistos(e)));
   return res.json({ docs: empleadosConMensajes });
 }

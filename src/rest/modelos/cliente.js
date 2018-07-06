@@ -7,15 +7,8 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   apellidos: String,
-  cedula: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  direccion: {
-    type: String,
-    required: true,
-  },
+  cedula: String,
+  direccion: String,
   ubicacion: {
     type: mongoose.Schema.Types.Point,
     index: "2dsphere",
@@ -25,6 +18,7 @@ const esquema = new mongoose.Schema({
     ref: "cuenta",
     required: true,
   },
+  correo: String,
   borrado: {
     type: Boolean,
     default: false,
