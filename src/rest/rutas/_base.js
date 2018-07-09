@@ -105,6 +105,9 @@ function error(res) {
     if (isEmpty(err)) {
       return res.status(200).send({});
     }
-    return res.status(500).send(err);
+    switch (err.code) {
+      case 11000: return res.status(409).send(err.message);
+      default: return res.status(500).send(err.message);
+    }
   };
 }

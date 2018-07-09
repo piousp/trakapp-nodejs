@@ -1,10 +1,11 @@
 export { ErrorMongo, UsuarioInvalido };
 
 
-function ErrorMongo(message) {
+function ErrorMongo(message, code) {
   this.name = "ErrorMongo";
+  this.code = code;
   this.message = message || "Hubo un problema en Mongo";
-  this.stack = (new Error()).stack;
+  this.stack = (new Error(code)).stack;
 }
 ErrorMongo.prototype = Object.create(Error.prototype);
 ErrorMongo.prototype.constructor = ErrorMongo;

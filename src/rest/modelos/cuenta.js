@@ -15,6 +15,10 @@ const esquema = new mongoose.Schema({
   cedula: {
     type: String,
   },
+  empresarial: {
+    type: Boolean,
+    default: false,
+  },
   borrado: {
     type: Boolean,
     default: false,
