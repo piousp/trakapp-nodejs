@@ -51,8 +51,11 @@ async function registrar(req, res) {
     if (existe) {
       return res.status(409).send("El usuario ya existe");
     }
-    const cuenta = await crearCuenta(req.body);
-    const usuario = await crearUsuario(req.body, cuenta._id);
+    let cuenta;
+    if (!req.body.cuentas) {
+      cuenta = await crearCuenta(req.body);
+    }
+    const usuario = await crearUsuario(req.body, cuenta);
     const html = renderizarHtml("verificarCuenta.html", {
       admin_url: entorno.ADMIN_URL,
       nombre_usuario: usuario.usuario.nombre,
@@ -96,14 +99,14 @@ async function validarPassword(usuario, password) {
   }
 }
 
-async function crearUsuario(data, idCuenta) {
+async function crearUsuario(data, cuenta) {
   debug("Creando usuario");
   const nuevoUsuario = {
     nombre: data.nombre,
     apellidos: data.apellidos,
     correo: data.correo,
     password: data.password,
-    cuenta: idCuenta,
+    cuentas: cuenta ? [cuenta._id] : data.cuentas,
   };
   const usuario = await comunUsuario.create(nuevoUsuario);
   const token = crearJWT(usuario);

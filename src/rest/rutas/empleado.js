@@ -40,8 +40,12 @@ async function getConMensajes(req, res) {
     .skip(abs.total)
     .limit(abs.cantidad)
     .lean();
+  const cant = await modelo.count({
+    cuenta: req.cuenta,
+    borrado: false,
+  });
   const empleadosConMensajes = await Promise.all(map(empleados, e => getCantMensajesNoVistos(e)));
-  return res.json({ docs: empleadosConMensajes });
+  return res.json({ docs: empleadosConMensajes, cant });
 }
 
 function postBase(req, res) {

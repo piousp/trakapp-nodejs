@@ -19,11 +19,11 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  cuenta: {
+  cuentas: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "cuenta",
     required: true,
-  },
+  }],
   activo: {
     type: Boolean,
     default: false,
