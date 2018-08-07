@@ -1,17 +1,30 @@
 import express from "express";
 import D from "debug";
 import cuenta from "../modelos/cuenta.js";
-import rutasGenericas from "./_base.js";
+import { getBase, putID, postBase, deleteID, ok, error } from "./_base.js";
 import enviarCorreo from "../../util/correos";
 import renderizarHtml from "../../util/renderizarHtml.js";
 import entorno from "../../entorno.js";
+import funDB from "../comun-db.js";
 
 const debug = D("ciris:rutas/cuenta.js");
 
 const Router = express.Router();
+const comun = funDB(cuenta);
 
-const router = rutasGenericas(Router, cuenta);
+Router.get("/cargarBulk", cargarBulk);
+Router.get("/:id", getID);
+getBase(Router, cuenta);
+putID(Router, cuenta);
 Router.post("/invitarUsuarios", invitarUsuarios);
+postBase(Router, cuenta);
+deleteID(Router, cuenta);
+
+function getID(req, res) {
+  comun.findOne(null, { _id: req.params.id, borrado: false })
+    .then(ok(res))
+    .catch(error(res));
+}
 
 async function invitarUsuarios(req, res) {
   try {
@@ -34,5 +47,17 @@ async function invitarUsuarios(req, res) {
   }
 }
 
+async function cargarBulk(req, res) {
+  try {
+    const query = { _id: { $in: req.query.cuentas } };
+    const cuentas = await comun.find(query);
+    debug(cuentas);
+    return res.json(cuentas);
+  } catch (err) {
+    debug(err);
+    return res.status(500).send(err.message);
+  }
+}
 
-export default router;
+
+export default Router;
