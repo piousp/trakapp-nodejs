@@ -27,7 +27,7 @@ function validar(req, res) {
       return res.status(401).send("Token expirado");
     }
     const separador = payload.sub.indexOf("|");
-    req.cuenta = payload.sub.substring(0, separador);
+    req.cuenta = req.headers.cuenta;
     req.usuario = payload.sub.substring(separador + 1, payload.sub.length);
     return "";
   } catch (err) {
@@ -45,7 +45,7 @@ function decodificar(tokenReq) {
 
 function crearJWT(usuario) {
   const payload = {
-    sub: `${usuario.cuenta}|${usuario._id}`,
+    sub: `${usuario._id}`,
     iat: moment().unix(),
     exp: moment().add(1, "years")
       .unix(),
