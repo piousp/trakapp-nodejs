@@ -4,6 +4,7 @@ import moment from "moment";
 import { crearJWT, estaAutorizado } from "./middleware.js";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloEmpleado from "../modelos/empleado.js";
+import modeloAdmin from "../modelos/admin.js";
 import modeloCuenta from "../modelos/cuenta.js";
 import funBD from "../comun-db.js";
 import modeloRecu from "../modelos/recuperacion.js";
@@ -19,8 +20,10 @@ const router = express.Router();
 const comunUsuario = funBD(modeloUsuario);
 const comunEmpleado = funBD(modeloEmpleado);
 const comunCuenta = funBD(modeloCuenta);
+const comunAdmin = funBD(modeloAdmin);
 
 router.post("/login/movil", login(comunEmpleado, false));
+router.post("/login/admin", login(comunAdmin, false));
 router.post("/login", login(comunUsuario, true));
 router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio(comunEmpleado, true));

@@ -4,7 +4,7 @@ import map from "lodash/map";
 import modeloUsuario from "../modelos/usuario.js";
 import modeloCuenta from "../modelos/cuenta.js";
 import mensaje from "../modelos/mensaje";
-import funDB from "../comun-db.js";
+import funDB, { skipLimitABS } from "../comun-db.js";
 import rutasGenericas, { ok, error } from "./_base.js";
 import enviarCorreo from "../../util/correos";
 
@@ -17,6 +17,7 @@ const comunCuenta = funDB(modeloCuenta);
 router.get("/yo", getYo);
 router.get("/cuenta", getCuenta);
 router.get("/conmensajes", getConMensajes);
+router.get("/listarPorCuenta", listarPorCuenta);
 router.put("/cuenta", actualizarCuenta);
 router.post("/reportarbug", reportarBug);
 
@@ -24,6 +25,12 @@ router.post("/reportarbug", reportarBug);
 rutasGenericas(router, modeloUsuario);
 
 export default router;
+
+async function listarPorCuenta(req, res) {
+  const paginacion = skipLimitABS(req.query);
+  const usuarios = await comunUsuario.find({ cuentas: req.query.cuentaID }, paginacion, "cuentas");
+  ok(res)(usuarios);
+}
 
 async function getConMensajes(req, res) {
   async function getCantMensajesNoVistos(e) {

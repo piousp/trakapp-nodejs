@@ -1,7 +1,6 @@
 import D from "debug";
 import noop from "lodash/noop";
-import mongoose from "mongoose";
-import modelo from "../rest/modelos/usuario.js";
+import modelo from "../rest/modelos/admin.js";
 import funDB from "../rest/comun-db.js";
 
 const debug = D("ciris:init/usuarioRoot.js");
@@ -22,9 +21,6 @@ async function revisarPorRoot() {
       correo: "root@ciriscr.com",
       password: "rastreadorRootCiris",
       nombre: "root",
-      apellidos: "ROOT",
-      cuenta: new mongoose.Types.ObjectId(),
-      activo: true,
     };
     const nuevoRoot = await comun.create(usuarioRoot);
     if (nuevoRoot._id) {

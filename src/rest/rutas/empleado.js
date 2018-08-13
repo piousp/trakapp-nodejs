@@ -4,7 +4,7 @@ import map from "lodash/map";
 import renderizarHtml from "../../util/renderizarHtml.js";
 import modelo from "../modelos/empleado.js";
 import mensaje from "../modelos/mensaje";
-import { getID, getBase, putID, deleteID, error } from "./_base";
+import { getID, getBase, putID, deleteID, ok, error } from "./_base";
 import funBD, { skipLimitABS } from "../comun-db.js";
 import enviarCorreo from "../../util/correos";
 import entorno from "../../entorno.js";
@@ -19,8 +19,15 @@ deleteID(router, modelo);
 router.post("/", postBase);
 router.get("/yo", getYo);
 router.get("/conmensajes", getConMensajes);
+router.get("/listarPorCuenta", listarPorCuenta);
 
 getID(router, modelo);
+
+async function listarPorCuenta(req, res) {
+  const paginacion = skipLimitABS(req.query);
+  const usuarios = await funBD(modelo).find({ cuenta: req.query.cuentaID }, paginacion);
+  ok(res)(usuarios);
+}
 
 async function getConMensajes(req, res) {
   async function getCantMensajesNoVistos(e) {
