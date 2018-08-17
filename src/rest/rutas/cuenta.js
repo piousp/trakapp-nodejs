@@ -1,5 +1,6 @@
 import express from "express";
 import D from "debug";
+import map from "lodash/map";
 import cuenta from "../modelos/cuenta.js";
 import { getBase, putID, postBase, deleteID, ok, error } from "./_base.js";
 import enviarCorreo from "../../util/correos";
@@ -13,12 +14,19 @@ const Router = express.Router();
 const comun = funDB(cuenta);
 
 Router.get("/cargarBulk", cargarBulk);
+Router.get("/listarCorreos", listarCorreos);
 Router.get("/:id", getID);
 getBase(Router, cuenta);
 putID(Router, cuenta);
 Router.post("/invitarUsuarios", invitarUsuarios);
 postBase(Router, cuenta);
 deleteID(Router, cuenta);
+
+async function listarCorreos(req, res) {
+  const cuentas = await comun.find({ borrado: false });
+  const correos = map(cuentas.docs, "correo");
+  ok(res)(correos);
+}
 
 function getID(req, res) {
   comun.findOne(null, { _id: req.params.id, borrado: false })

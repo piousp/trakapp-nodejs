@@ -18,13 +18,20 @@ router.get("/yo", getYo);
 router.get("/cuenta", getCuenta);
 router.get("/conmensajes", getConMensajes);
 router.get("/listarPorCuenta", listarPorCuenta);
+router.get("/listarCorreos/:id", listarCorreos);
 router.put("/cuenta", actualizarCuenta);
 router.post("/reportarbug", reportarBug);
-
 
 rutasGenericas(router, modeloUsuario);
 
 export default router;
+
+async function listarCorreos(req, res) {
+  const query = req.params.id !== "undefined" ? { cuentas: req.params.id, borrado: false } : { borrado: false };
+  const usuarios = await comunUsuario.find(query);
+  const correos = map(usuarios.docs, "correo");
+  ok(res)(correos);
+}
 
 async function listarPorCuenta(req, res) {
   const paginacion = skipLimitABS(req.query);
