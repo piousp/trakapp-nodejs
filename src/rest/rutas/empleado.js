@@ -20,13 +20,21 @@ router.post("/", postBase);
 router.get("/yo", getYo);
 router.get("/conmensajes", getConMensajes);
 router.get("/listarPorCuenta", listarPorCuenta);
+router.get("/listarCorreos/:id", listarCorreos);
 
 getID(router, modelo);
 
+async function listarCorreos(req, res) {
+  const query = req.params.id !== "undefined" ? { cuentas: req.params.id, borrado: false } : { borrado: false };
+  const empleados = await funBD(modelo).find(query);
+  const correos = map(empleados.docs, "correo");
+  ok(res)(correos);
+}
+
 async function listarPorCuenta(req, res) {
   const paginacion = skipLimitABS(req.query);
-  const usuarios = await funBD(modelo).find({ cuenta: req.query.cuentaID }, paginacion);
-  ok(res)(usuarios);
+  const empleados = await funBD(modelo).find({ cuenta: req.query.cuentaID }, paginacion);
+  ok(res)(empleados);
 }
 
 async function getConMensajes(req, res) {
