@@ -1,6 +1,6 @@
 {
   "name": "trakapp-backend",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "Backend de Trakapp",
   "main": "src/index.js",
   "author": "Ciris Informatic Solutions",

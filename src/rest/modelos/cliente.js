@@ -6,7 +6,10 @@ const esquema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  apellidos: String,
+  apellidos: {
+    type: String,
+    default: "",
+  },
   cedula: String,
   direccion: String,
   ubicacion: {
@@ -19,6 +22,7 @@ const esquema = new mongoose.Schema({
     required: true,
   },
   correo: String,
+  esEmpresa: Boolean,
   borrado: {
     type: Boolean,
     default: false,
