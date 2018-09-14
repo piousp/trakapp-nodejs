@@ -77,6 +77,7 @@ function getTareasEmpleado(req, res) {
     activa: true,
     empleado: req.params.id,
   };
+  console.log(query);
   comun.find(query)
     .then(ok(res))
     .catch(error(res));
