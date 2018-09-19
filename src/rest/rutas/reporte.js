@@ -22,6 +22,9 @@ function getTareasRealizadas(req, res) {
     activa: false,
     borrado: false,
   };
+  if (filtros.empleado) {
+    query.empleado = filtros.empleado;
+  }
   comunTareas.find(query, null, "empleado")
     .then(ok(res))
     .catch(error(res));
@@ -37,6 +40,9 @@ function getTareasPendientes(req, res) {
     activa: true,
     borrado: false,
   };
+  if (filtros.empleado) {
+    query.empleado = filtros.empleado;
+  }
   comunTareas.find(query, null, "empleado")
     .then(ok(res))
     .catch(error(res));
@@ -55,6 +61,9 @@ function getTareasAtrasadas(req, res) {
     activa: true,
     borrado: false,
   };
+  if (filtros.empleado) {
+    query.empleado = filtros.empleado;
+  }
   comunTareas.find(query, null, "empleado")
     .then(ok(res))
     .catch(error(res));
