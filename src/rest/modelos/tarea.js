@@ -49,6 +49,11 @@ const esquema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "cliente",
   },
+  subtareas: [{
+    texto: String,
+    completado: Boolean,
+    fecha: Date,
+  }],
 });
 
 const modelo = mongoose.model("tarea", esquema);
