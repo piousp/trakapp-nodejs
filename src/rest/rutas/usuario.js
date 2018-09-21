@@ -50,7 +50,7 @@ async function getConMensajes(req, res) {
     return e;
   }
   const usuarios = await modeloUsuario.find({
-    cuenta: req.cuenta,
+    cuentas: req.cuenta,
     borrado: false,
     activo: true,
   }).lean();

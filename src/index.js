@@ -11,6 +11,7 @@ import recuperaciones from "./rest/rutas/recuperacion.js";
 import clientes from "./rest/rutas/cliente.js";
 import cuentas from "./rest/rutas/cuenta.js";
 import correos from "./rest/rutas/correo.js";
+import reportes from "./rest/rutas/reporte.js";
 import firebaseAdmin from "./util/pushNotifications";
 
 const debug = D("ciris:index.js");
@@ -28,5 +29,6 @@ servidor((app) => {
   app.use("/api/cliente", estaAutorizado, clientes);
   app.use("/api/cuenta", estaAutorizado, cuentas);
   app.use("/api/correo", estaAutorizado, correos);
+  app.use("/api/reporte", estaAutorizado, reportes);
   return app;
 });

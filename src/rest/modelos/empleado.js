@@ -30,7 +30,7 @@ const esquema = new mongoose.Schema({
   },
   password: {
     type: String,
-    default: "movil123",
+    required: true,
   },
   device: {
     token: String,
