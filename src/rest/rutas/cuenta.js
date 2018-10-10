@@ -15,6 +15,7 @@ const comun = funDB(cuenta);
 
 Router.get("/cargarBulk", cargarBulk);
 Router.get("/listarCorreos", listarCorreos);
+Router.get("/activa/", getCuentaActiva);
 Router.get("/:id", getID);
 getBase(Router, cuenta);
 putID(Router, cuenta);
@@ -23,15 +24,31 @@ postBase(Router, cuenta);
 deleteID(Router, cuenta);
 
 async function listarCorreos(req, res) {
-  const cuentas = await comun.find({ borrado: false });
-  const correos = map(cuentas.docs, "correo");
-  ok(res)(correos);
+  try {
+    const cuentas = await comun.find({ borrado: false });
+    const correos = map(cuentas.docs, "correo");
+    ok(res)(correos);
+  } catch (e) {
+    error(res)(e);
+  }
 }
 
-function getID(req, res) {
-  comun.findOne(null, { _id: req.params.id, borrado: false })
-    .then(ok(res))
-    .catch(error(res));
+async function getCuentaActiva(req, res) {
+  try {
+    const resp = await comun.findOne(req.cuenta);
+    ok(res)(resp);
+  } catch (e) {
+    error(res)(e);
+  }
+}
+
+async function getID(req, res) {
+  try {
+    const resp = await comun.findOne(null, { _id: req.params.id, borrado: false });
+    ok(res)(resp);
+  } catch (e) {
+    error(res)(e);
+  }
 }
 
 async function invitarUsuarios(req, res) {

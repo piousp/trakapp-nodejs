@@ -7,16 +7,17 @@ import tarea from "../modelos/tarea.js";
 import empleado from "../modelos/empleado.js";
 import funDB from "../comun-db.js";
 import { enviarPush } from "../../util/pushNotifications";
-import { getID, putID, deleteID, ok, error } from "./_base";
+import { getID, getBase, putID, deleteID, ok, error } from "./_base";
 
 const debug = D("ciris:rutas/tarea.js");
 const router = express.Router();
 const comun = funDB(tarea);
 
 router.get("/empleado/:id", getTareasEmpleado);
-router.get("/lista", listarTareas);
+router.get("/listaPopulada", listarTareasPopuladas);
+router.get("/listarXFecha", listarXFecha);
 getID(router, tarea, "cuenta");
-router.get("/", getBase);
+getBase(router, tarea);
 router.put("/completar/:id", completar);
 router.put("/iniciar/:id", iniciar);
 putID(router, tarea);
@@ -44,7 +45,7 @@ const jsonNvaTarea = {
   },
 };
 
-async function listarTareas(req, res) {
+async function listarTareasPopuladas(req, res) {
   try {
     const query = { cuenta: req.cuenta, borrado: false };
     const docs = await comun.find(query, null, "cliente empleado");
@@ -83,7 +84,7 @@ function getTareasEmpleado(req, res) {
 }
 
 
-function getBase(req, res) {
+function listarXFecha(req, res) {
   const query = {
     borrado: false,
     cuenta: req.cuenta,
