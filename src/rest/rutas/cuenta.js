@@ -18,6 +18,7 @@ Router.get("/listarCorreos", listarCorreos);
 Router.get("/activa/", getCuentaActiva);
 Router.get("/:id", getID);
 getBase(Router, cuenta);
+Router.put("/migrarEmpresarial/:id", migrarEmpresarial);
 putID(Router, cuenta);
 Router.post("/invitarUsuarios", invitarUsuarios);
 postBase(Router, cuenta);
@@ -65,10 +66,10 @@ async function invitarUsuarios(req, res) {
     };
     const resp = await enviarCorreo(data);
     debug(resp);
-    return res.status(200).send("Se envió el correo invitando a los usuarios");
+    return ok(res)("Se envió el correo invitando a los usuarios");
   } catch (err) {
     debug(err);
-    return res.status(500).send(err.message);
+    return error(res)(err.message);
   }
 }
 
@@ -77,10 +78,22 @@ async function cargarBulk(req, res) {
     const query = { _id: { $in: req.query.cuentas } };
     const cuentas = await comun.find(query);
     debug(cuentas);
-    return res.json(cuentas);
+    return ok(res)(cuentas);
   } catch (err) {
     debug(err);
-    return res.status(500).send(err.message);
+    return error(res)(err.message);
+  }
+}
+
+async function migrarEmpresarial(req, res) {
+  try {
+    const query = { $set: { empresarial: true } };
+    const respCuenta = await comun.efectuarCambio(req.params.id, query);
+    debug(respCuenta);
+    return ok(res)(respCuenta);
+  } catch (err) {
+    debug(err);
+    return error(res)(err.message);
   }
 }
 
