@@ -55,9 +55,9 @@ async function getID(req, res) {
 async function invitarUsuarios(req, res) {
   try {
     const html = renderizarHtml("invitacionUnirse.html", {
-      url_invitacion: `${entorno.ADMIN_URL}/invitacion/${req.body.usuario.cuenta._id}`,
+      url_invitacion: `${entorno.ADMIN_URL}/invitacion/${req.body.cuenta._id}`,
       nombre_usuario: req.body.usuario.nombre,
-      cuenta_nombre: req.body.usuario.cuenta.nombre,
+      cuenta_nombre: req.body.cuenta.nombre,
     });
     const data = {
       to: req.body.correos.join(", "),

@@ -32,7 +32,7 @@ router.post("/recuperarContrasena/movil/:id", recuperarContrasena(comunEmpleado)
 router.post("/recuperarContrasena/:id", recuperarContrasena(comunUsuario));
 router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
 router.post("/verificarPasswordCorrecto/movil", estaAutorizado, verificarPasswordCorrectoMovil);
-router.post("/actualizarContrasena", estaAutorizado, actualizarContrasena(comunUsuario));
+router.put("/actualizarContrasena/", estaAutorizado, actualizarContrasena(comunUsuario));
 router.put("/actualizarContrasena/movil", estaAutorizado, actualizarContrasena(comunEmpleado));
 router.get("/activacion/:id", activarCuenta);
 
@@ -246,7 +246,7 @@ function loginGenerico(coleccion, queryUsuario) {
 
 function actualizarContrasena(coleccion) {
   return async function actualizarContrasenaInterno(req, res) {
-    debug("actualizarContrasena");
+    debug("actualizarContrasenaInterno");
     try {
       const user = await coleccion.updateOne(
         req.usuario,
