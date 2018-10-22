@@ -39,6 +39,7 @@ const jsonNvoChat = {
 };
 
 async function postBase(req, res) {
+  debug("postBase");
   req.body.cuenta = req.cuenta;
   try {
     const nuevoDoc = await comun.create(req.body);

@@ -2,7 +2,6 @@ import express from "express";
 import D from "debug";
 import map from "lodash/map";
 import modeloUsuario from "../modelos/usuario.js";
-import modeloCuenta from "../modelos/cuenta.js";
 import mensaje from "../modelos/mensaje";
 import funDB, { skipLimitABS } from "../comun-db.js";
 import rutasGenericas, { ok, error } from "./_base.js";
@@ -12,14 +11,11 @@ const debug = D("ciris:rutas/usuario.js");
 
 const router = express.Router();
 const comunUsuario = funDB(modeloUsuario);
-const comunCuenta = funDB(modeloCuenta);
 
 router.get("/yo", getYo);
-router.get("/cuenta", getCuenta);
 router.get("/conmensajes", getConMensajes);
 router.get("/listarPorCuenta", listarPorCuenta);
 router.get("/listarCorreos/:id", listarCorreos);
-router.put("/cuenta", actualizarCuenta);
 router.post("/reportarbug", reportarBug);
 
 rutasGenericas(router, modeloUsuario);
@@ -27,19 +23,30 @@ rutasGenericas(router, modeloUsuario);
 export default router;
 
 async function listarCorreos(req, res) {
-  const query = req.params.id !== "undefined" ? { cuentas: req.params.id, borrado: false } : { borrado: false };
-  const usuarios = await comunUsuario.find(query);
-  const correos = map(usuarios.docs, "correo");
-  ok(res)(correos);
+  debug("Listando Correos");
+  try {
+    const query = req.params.id !== "undefined" ? { cuentas: req.params.id, borrado: false } : { borrado: false };
+    const usuarios = await comunUsuario.find(query);
+    const correos = map(usuarios.docs, "correo");
+    ok(res)(correos);
+  } catch (e) {
+    error(res)(e);
+  }
 }
 
 async function listarPorCuenta(req, res) {
-  const paginacion = skipLimitABS(req.query);
-  const usuarios = await comunUsuario.find({ cuentas: req.query.cuentaID }, paginacion, "cuentas");
-  ok(res)(usuarios);
+  debug("Listando por cuenta");
+  try {
+    const paginacion = skipLimitABS(req.query);
+    const usuarios = await comunUsuario.find({ cuentas: req.query.cuentaID }, paginacion, "cuentas");
+    ok(res)(usuarios);
+  } catch (e) {
+    error(res)(e);
+  }
 }
 
 async function getConMensajes(req, res) {
+  debug("Get con mensajes");
   async function getCantMensajesNoVistos(e) {
     const cant = await mensaje.find({
       emisor: e._id,
@@ -49,39 +56,39 @@ async function getConMensajes(req, res) {
     e.cantMensajesNoVistos = cant;
     return e;
   }
-  const usuarios = await modeloUsuario.find({
-    cuentas: req.cuenta,
-    borrado: false,
-    activo: true,
-  }).lean();
-  const usuariosConMensajes = await Promise.all(map(usuarios, e => getCantMensajesNoVistos(e)));
-  return res.json({ docs: usuariosConMensajes });
+  try {
+    const usuarios = await modeloUsuario.find({
+      cuentas: req.cuenta,
+      borrado: false,
+      activo: true,
+    }).lean();
+    const usuariosConMensajes = await Promise.all(map(usuarios, e => getCantMensajesNoVistos(e)));
+    return ok(res)({ docs: usuariosConMensajes });
+  } catch (e) {
+    return error(res)(e);
+  }
 }
-
 
 async function getYo(req, res) {
-  const resp = await comunUsuario.findOne(req.usuario);
-  res.json(resp);
-}
-
-async function getCuenta(req, res) {
-  const resp = await comunCuenta.findOne(req.cuenta);
-  res.json(resp);
-}
-
-async function actualizarCuenta(req, res) {
-  debug("actualizarCuenta", req.body);
-  const quer = { _id: req.cuenta, borrado: false };
-  comunCuenta.findOneAndUpdate(null, req.body, quer)
-    .then(ok(res))
-    .catch(error(res));
+  debug("Get Yo");
+  try {
+    const resp = await comunUsuario.findOne(req.usuario);
+    ok(res)(resp);
+  } catch (e) {
+    error(res)(e);
+  }
 }
 
 function reportarBug(req, res) {
-  return enviarCorreo({
-    to: "soporte@ciriscr.com",
-    from: `${req.body.usuario.nombre} ${req.body.usuario.apellidos} <${req.body.usuario.correo}>`,
-    subject: req.body.subject,
-    text: req.body.message,
-  }).then(() => res.end());
+  debug("Reportando bug");
+  try {
+    return enviarCorreo({
+      to: "soporte@ciriscr.com",
+      from: `${req.body.usuario.nombre} ${req.body.usuario.apellidos} <${req.body.usuario.correo}>`,
+      subject: req.body.subject,
+      text: req.body.message,
+    }).then(() => ok(res)("Se envió el correo"));
+  } catch (e) {
+    return error(res)(e);
+  }
 }

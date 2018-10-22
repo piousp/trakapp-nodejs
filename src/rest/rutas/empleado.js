@@ -47,20 +47,13 @@ async function getConMensajes(req, res) {
     e.cantMensajesNoVistos = cant;
     return e;
   }
-  const abs = skipLimitABS(req.query);
-  const empleados = await modelo.find({
+  const empleados = await funBD(modelo).find({
     cuenta: req.cuenta,
     borrado: false,
-  })
-    .skip(abs.total)
-    .limit(abs.cantidad)
-    .lean();
-  const cant = await modelo.count({
-    cuenta: req.cuenta,
-    borrado: false,
-  });
-  const empleadosConMensajes = await Promise.all(map(empleados, e => getCantMensajesNoVistos(e)));
-  return res.json({ docs: empleadosConMensajes, cant });
+  }, req.query);
+  const empleadosConMensajes =
+  await Promise.all(map(empleados.docs, e => getCantMensajesNoVistos(e)));
+  return res.json({ docs: empleadosConMensajes, cant: empleados.cant });
 }
 
 function postBase(req, res) {

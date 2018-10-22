@@ -32,6 +32,7 @@ function getBase(router, modelo) {
   const comun = funDB(modelo);
   function getBaseInterno(req, res) {
     debug("getBase");
+    debug({ cuenta: req.cuenta, borrado: false }, req.query);
     comun.find({ cuenta: req.cuenta, borrado: false }, req.query)
       .then(ok(res))
       .catch(error(res));

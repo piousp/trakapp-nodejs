@@ -28,12 +28,12 @@ router.post("/login", login(comunUsuario, true));
 router.post("/registro", registrar);
 router.post("/solicitarCambio/movil", solicitarCambio(comunEmpleado, true));
 router.post("/solicitarCambio/", solicitarCambio(comunUsuario, false));
-router.post("/cambiarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
-router.post("/cambiarContrasena/:id", recuperarContrasena(comunUsuario));
+router.post("/recuperarContrasena/movil/:id", recuperarContrasena(comunEmpleado));
+router.post("/recuperarContrasena/:id", recuperarContrasena(comunUsuario));
 router.post("/verificarPasswordCorrecto", estaAutorizado, verificarPasswordCorrecto);
 router.post("/verificarPasswordCorrecto/movil", estaAutorizado, verificarPasswordCorrectoMovil);
-router.post("/actualizarContrasena", estaAutorizado, cambiarContrasena(comunUsuario));
-router.put("/actualizarContrasena/movil", estaAutorizado, cambiarContrasena(comunEmpleado));
+router.put("/actualizarContrasena/", estaAutorizado, actualizarContrasena(comunUsuario));
+router.put("/actualizarContrasena/movil", estaAutorizado, actualizarContrasena(comunEmpleado));
 router.get("/activacion/:id", activarCuenta);
 
 function login(coleccion, esUsuario) {
@@ -244,9 +244,9 @@ function loginGenerico(coleccion, queryUsuario) {
   };
 }
 
-function cambiarContrasena(coleccion) {
-  return async function cambiarContrasenaInterno(req, res) {
-    debug("cambiarContrasena");
+function actualizarContrasena(coleccion) {
+  return async function actualizarContrasenaInterno(req, res) {
+    debug("actualizarContrasenaInterno");
     try {
       const user = await coleccion.updateOne(
         req.usuario,
