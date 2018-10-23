@@ -8,7 +8,7 @@ import renderizarHtml from "../../util/renderizarHtml.js";
 import entorno from "../../entorno.js";
 import funDB from "../comun-db.js";
 
-const debug = D("ciris:rutas/cuenta.js");
+const debug = D("ciris:rest/rutas/cuenta.js");
 
 const Router = express.Router();
 const comun = funDB(cuenta);
@@ -24,7 +24,10 @@ Router.post("/invitarUsuarios", invitarUsuarios);
 postBase(Router, cuenta);
 deleteID(Router, cuenta);
 
+export default Router;
+
 async function listarCorreos(req, res) {
+  debug("listarCorreos");
   try {
     const cuentas = await comun.find({ borrado: false });
     const correos = map(cuentas.docs, "correo");
@@ -35,6 +38,7 @@ async function listarCorreos(req, res) {
 }
 
 async function getCuentaActiva(req, res) {
+  debug("getCuentaActiva");
   try {
     const resp = await comun.findOne(req.cuenta);
     ok(res)(resp);
@@ -44,6 +48,7 @@ async function getCuentaActiva(req, res) {
 }
 
 async function getID(req, res) {
+  debug("getID");
   try {
     const resp = await comun.findOne(null, { _id: req.params.id, borrado: false });
     ok(res)(resp);
@@ -53,6 +58,7 @@ async function getID(req, res) {
 }
 
 async function invitarUsuarios(req, res) {
+  debug("invitarUsuarios");
   try {
     const html = renderizarHtml("invitacionUnirse.html", {
       url_invitacion: `${entorno.ADMIN_URL}/invitacion/${req.body.cuenta._id}`,
@@ -74,6 +80,7 @@ async function invitarUsuarios(req, res) {
 }
 
 async function cargarBulk(req, res) {
+  debug("cargarBulk");
   try {
     const query = { _id: { $in: req.query.cuentas } };
     const cuentas = await comun.find(query);
@@ -86,6 +93,7 @@ async function cargarBulk(req, res) {
 }
 
 async function migrarEmpresarial(req, res) {
+  debug("migrarEmpresarial");
   try {
     const query = { $set: { empresarial: true } };
     const respCuenta = await comun.efectuarCambio(req.params.id, query);
@@ -96,6 +104,3 @@ async function migrarEmpresarial(req, res) {
     return error(res)(err.message);
   }
 }
-
-
-export default Router;

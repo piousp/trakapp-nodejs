@@ -19,6 +19,8 @@ router.get("/publico/", getPublico);
 router.post("/", postBase);
 router.put("/marcarvistos/:emisor", marcarVistos);
 
+export default router;
+
 const jsonNvoChat = {
   notification: {
     title: "Nuevo mensaje",
@@ -62,6 +64,7 @@ async function postBase(req, res) {
 }
 
 async function getPrivado(req, res) {
+  debug("getPrivado");
   const query = {
     borrado: false,
     emisor: { $in: [req.query.emisor, req.params.receptor] },
@@ -76,6 +79,7 @@ async function getPrivado(req, res) {
 }
 
 async function getPublico(req, res) {
+  debug("getPrivado");
   try {
     const msjs = await getMensajes({
       borrado: false,
@@ -89,6 +93,7 @@ async function getPublico(req, res) {
 }
 
 async function getMensajes(query, paginacion) {
+  debug("getMensajes");
   try {
     const msjs = await mensaje
       .find(query)
@@ -107,6 +112,7 @@ async function getMensajes(query, paginacion) {
 }
 
 function marcarVistos(req, res) {
+  debug("marcarVistos");
   const query = {
     emisor: req.params.emisor,
     receptor: req.usuario,
@@ -117,5 +123,3 @@ function marcarVistos(req, res) {
     .then(ok(res))
     .catch(error(res));
 }
-
-export default router;

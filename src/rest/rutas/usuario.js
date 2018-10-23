@@ -47,25 +47,32 @@ async function listarPorCuenta(req, res) {
 
 async function getConMensajes(req, res) {
   debug("Get con mensajes");
-  async function getCantMensajesNoVistos(e) {
-    const cant = await mensaje.find({
-      emisor: e._id,
-      receptor: req.usuario,
-      visto: false,
-    }).count();
-    e.cantMensajesNoVistos = cant;
-    return e;
-  }
   try {
     const usuarios = await modeloUsuario.find({
       cuentas: req.cuenta,
       borrado: false,
       activo: true,
     }).lean();
-    const usuariosConMensajes = await Promise.all(map(usuarios, e => getCantMensajesNoVistos(e)));
+    const usuariosConMensajes =
+    await Promise.all(map(usuarios, e => getCantMensajesNoVistos(e, req.usuario)));
     return ok(res)({ docs: usuariosConMensajes });
   } catch (e) {
     return error(res)(e);
+  }
+}
+
+async function getCantMensajesNoVistos(usuario, usuarioReq) {
+  debug("getCantMensajesNoVistos");
+  try {
+    const cant = await mensaje.find({
+      emisor: usuario._id,
+      receptor: usuarioReq,
+      visto: false,
+    }).count();
+    usuario.cantMensajesNoVistos = cant;
+    return usuario;
+  } catch (e) {
+    return e;
   }
 }
 
