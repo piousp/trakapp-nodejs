@@ -1,14 +1,20 @@
 import express from "express";
 import { Types } from "mongoose";
+import D from "debug";
 import modCliente from "../modelos/cliente.js";
 import rutasGenericas from "./_base.js";
 import { skipLimitABS } from "../comun-db.js";
 
 const router = express.Router();
+const debug = D("ciris:rest/rutas/cliente.js");
 
+rutasGenericas(router, modCliente);
 router.get("/buscar/:txt", buscarClientes);
 
+export default router;
+
 async function buscarClientes(req, res) {
+  debug("buscarClientes");
   const query = [
     {
       $project: {
@@ -38,7 +44,3 @@ async function buscarClientes(req, res) {
     return res.status(500).end();
   }
 }
-
-rutasGenericas(router, modCliente);
-
-export default router;

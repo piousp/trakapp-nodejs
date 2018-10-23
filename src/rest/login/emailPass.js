@@ -37,6 +37,7 @@ router.put("/actualizarContrasena/movil", estaAutorizado, actualizarContrasena(c
 router.get("/activacion/:id", activarCuenta);
 
 function login(coleccion, esUsuario) {
+  debug("Logueando");
   return (req, res) => {
     const query = { correo: req.body.login, borrado: false };
     if (esUsuario) {
@@ -47,8 +48,8 @@ function login(coleccion, esUsuario) {
 }
 
 async function registrar(req, res) {
+  debug("Realizando la acción de registrar");
   try {
-    debug("Realizando la acción de registrar");
     const existe = await existeUsuario(req.body.correo);
     debug("Usuario existe: ", existe);
     if (existe) {
@@ -86,8 +87,8 @@ async function registrar(req, res) {
 }
 
 async function validarPassword(usuario, password) {
+  debug("Usuario encontrado, comparando el password");
   try {
-    debug("Usuario encontrado, comparando el password");
     const passwdValido = await usuario.comparePassword(password);
     if (passwdValido) {
       const token = crearJWT(usuario);
@@ -216,6 +217,7 @@ function verificarPasswordCorrecto(req, res) {
 }
 
 function verificarPasswordCorrectoMovil(req, res) {
+  debug("verificarPasswordCorrectoMovil");
   return loginGenerico(comunEmpleado, { _id: req.usuario })(req, res);
 }
 
@@ -271,11 +273,13 @@ function actualizarContrasena(coleccion) {
 }
 
 async function existeUsuario(correo) {
+  debug("existeUsuario");
   const conteo = await funBD(modeloUsuario).count({ correo, borrado: false });
   return conteo > 0;
 }
 
 async function activarCuenta(req, res) {
+  debug("activarCuenta");
   try {
     const usuario = await comunUsuario.findOne(null, { _id: req.params.id });
     if (!usuario) {

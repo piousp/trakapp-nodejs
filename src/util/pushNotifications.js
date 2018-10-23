@@ -5,6 +5,12 @@ import serviceAccount from "./keys/trakapp-b7695-firebase-adminsdk-p1nfq-fbafb80
 
 const debug = D("ciris:util/pushNotifications.js");
 
+export default iniciarFireBase;
+export {
+  iniciarFireBase,
+  enviarPush,
+};
+
 function iniciarFireBase() {
   debug("Inciando Firebase");
   admin.initializeApp({
@@ -20,9 +26,3 @@ async function enviarPush(data) {
     .then(response => debug("Successfully sent message:", response))
     .catch(error => debug("Error sending message:", error));
 }
-
-export default iniciarFireBase;
-export {
-  iniciarFireBase,
-  enviarPush,
-};

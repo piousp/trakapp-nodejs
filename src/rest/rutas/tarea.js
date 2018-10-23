@@ -24,6 +24,8 @@ putID(router, tarea);
 router.post("/", postTarea);
 deleteID(router, tarea);
 
+export default router;
+
 const jsonNvaTarea = {
   notification: {
     title: "Nueva tarea",
@@ -46,82 +48,98 @@ const jsonNvaTarea = {
 };
 
 async function listarTareasPopuladas(req, res) {
+  debug("listarTareasPopuladas");
   try {
     const query = { cuenta: req.cuenta, borrado: false };
     const docs = await comun.find(query, null, "cliente empleado");
-    return res.json(docs);
+    return ok(res)(docs);
   } catch (e) {
-    return error(e);
+    return error(res)(e);
   }
 }
 
 async function postTarea(req, res) {
   debug("postTarea");
-  req.body.cuenta = req.cuenta;
   try {
+    req.body.cuenta = req.cuenta;
     const objTarea = await comun.create(req.body);
     const objEmpleado = await empleado.findOne({ _id: objTarea.empleado }).lean();
     if (objEmpleado.device && objEmpleado.device.token && objEmpleado.device.platform) {
       const temp = assign(cloneDeep(jsonNvaTarea), { token: objEmpleado.device.token });
       enviarPush(temp);
     }
-    return res.json(objTarea);
+    return ok(res)(objTarea);
   } catch (e) {
-    return error(e);
+    return error(res)(e);
   }
 }
 
-function getTareasEmpleado(req, res) {
-  const query = {
-    borrado: false,
-    cuenta: req.cuenta,
-    activa: true,
-    empleado: req.params.id,
-  };
-  comun.find(query)
-    .then(ok(res))
-    .catch(error(res));
+async function getTareasEmpleado(req, res) {
+  debug("getTareasEmpleado");
+  try {
+    const query = {
+      borrado: false,
+      cuenta: req.cuenta,
+      activa: true,
+      empleado: req.params.id,
+    };
+    const tareas = await comun.find(query);
+    return ok(res)(tareas);
+  } catch (e) {
+    return error(res)(e);
+  }
 }
 
 
-function listarXFecha(req, res) {
-  const query = {
-    borrado: false,
-    cuenta: req.cuenta,
-    start: {
-      $gte: req.query.fechaInicio,
-      $lte: req.query.fechaFin,
-    },
-  };
-  comun.find(query, null, "cliente")
-    .then(ok(res))
-    .catch(error(res));
+async function listarXFecha(req, res) {
+  debug("listarXFecha");
+  try {
+    const query = {
+      borrado: false,
+      cuenta: req.cuenta,
+      start: {
+        $gte: req.query.fechaInicio,
+        $lte: req.query.fechaFin,
+      },
+    };
+    const tareas = await comun.find(query, null, "cliente");
+    return ok(res)(tareas);
+  } catch (e) {
+    return error(res)(e);
+  }
 }
 
 async function completar(req, res) {
-  const tareatemp = req.body;
-  const tareaPopulada = await tarea
-    .findOne({ _id: tareatemp._id }, { title: 1, empleado: 1, cuenta: 1 })
-    .populate("empleado");
-  req.socketIO.to(tareaPopulada.cuenta).emit("notificarTarea", {
-    title: tareaPopulada.title,
-    empleado: {
-      nombre: tareaPopulada.empleado.nombre,
-      apellidos: tareaPopulada.empleado.apellidos,
-    },
-  });
-  comun.efectuarCambio(
-    req.params.id,
-    { $set: { activa: false, horaFin: moment(), post: tareatemp.post } },
-  )
-    .then(ok(res))
-    .catch(error(res));
+  debug("completar");
+  try {
+    const tareatemp = req.body;
+    const tareaPopulada = await tarea
+      .findOne({ _id: tareatemp._id }, { title: 1, empleado: 1, cuenta: 1 })
+      .populate("empleado");
+    req.socketIO.to(tareaPopulada.cuenta).emit("notificarTarea", {
+      title: tareaPopulada.title,
+      empleado: {
+        nombre: tareaPopulada.empleado.nombre,
+        apellidos: tareaPopulada.empleado.apellidos,
+      },
+    });
+    const tareaCambiada = await comun.efectuarCambio(
+      req.params.id,
+      { $set: { activa: false, horaFin: moment(), post: tareatemp.post } },
+    );
+    return ok(res)(tareaCambiada);
+  } catch (e) {
+    return error(res)(e);
+  }
 }
 
-function iniciar(req, res) {
-  comun.efectuarCambio(req.params.id, { $set: { horaInicio: moment() } })
-    .then(ok(res))
-    .catch(error(res));
+async function iniciar(req, res) {
+  debug("iniciar");
+  try {
+    const tareaCambiada =
+    await comun.efectuarCambio(req.params.id, { $set: { horaInicio: moment() } });
+    return ok(res)(tareaCambiada);
+  } catch (e) {
+    return error(res)(e);
+  }
 }
-
-export default router;
