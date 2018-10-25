@@ -51,7 +51,7 @@ async function listarTareasPopuladas(req, res) {
   debug("listarTareasPopuladas");
   try {
     const query = { cuenta: req.cuenta, borrado: false };
-    const docs = await comun.find(query, null, "cliente empleado");
+    const docs = await comun.find(query, req.query, "cliente empleado");
     return ok(res)(docs);
   } catch (e) {
     return error(res)(e);
