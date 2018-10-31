@@ -53,6 +53,7 @@ async function getConMensajes(req, res) {
     const empleados = await funBD(modelo).find({
       cuenta: req.cuenta,
       borrado: false,
+      ubicacion: { $exists: true },
     }, req.query);
     const empleadosConMensajes =
     await Promise.all(map(empleados.docs, e => getCantMensajesNoVistos(e, req.usuario)));
