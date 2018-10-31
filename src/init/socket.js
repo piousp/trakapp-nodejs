@@ -7,9 +7,11 @@ import forEach from "lodash/forEach";
 import entorno from "../entorno.js";
 import funBD from "../rest/comun-db.js";
 import empleado from "../rest/modelos/empleado.js";
+import historialPosicion from "../rest/modelos/historialPosicion.js";
 
 const debug = D("ciris:init/socket.js");
 const cEmpleados = funBD(empleado);
+const cHistorialPosicion = funBD(historialPosicion);
 
 export default app => configurarOyentes(iniciarOyente(app));
 
@@ -60,6 +62,7 @@ async function actualizarPosicion(data) {
     };
     try {
       const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
+      await procesarHistorial(usuario, pos);
       delete empResp.password;
       debug("***UBICACIÓN ACTUALIZADA***");
       return empResp;
@@ -72,6 +75,49 @@ async function actualizarPosicion(data) {
   debug("No hay que actualizar en BD. Retornando");
   usuario.ubicacion.pos = pos;
   return usuario;
+}
+
+async function procesarHistorial(usuario, pos) {
+  const queryHistorial = {
+    $and: [
+      { fecha: { $gte: moment().startOf("day") } },
+      { fecha: { $lte: moment().endOf("day") } },
+    ],
+    empleado: usuario._id,
+    cuenta: usuario.cuenta,
+  };
+  const historial = await cHistorialPosicion.findOneFat(null, queryHistorial);
+  if (historial) {
+    actualizarHistorial(historial, pos);
+  } else {
+    crearHistorial(usuario, pos);
+  }
+}
+
+async function actualizarHistorial(historial, pos) {
+  historial.lastUpdate = moment();
+  historial.ubicaciones.coordinates.push(pos.coordinates);
+  await cHistorialPosicion.updateOne(
+    historial._id,
+    historial,
+  );
+}
+
+async function crearHistorial(usuario, pos) {
+  const otrasCoordenadas = [
+    Number(pos.coordinates[0].toFixed(5)),
+    Number(pos.coordinates[1].toFixed(5)),
+  ];
+  await cHistorialPosicion.create({
+    fecha: moment(),
+    cuenta: usuario.cuenta,
+    empleado: usuario._id,
+    lastUpdate: moment(),
+    ubicaciones: {
+      type: "LineString",
+      coordinates: [otrasCoordenadas, pos.coordinates],
+    },
+  });
 }
 
 function iniciarOyente(app) {
