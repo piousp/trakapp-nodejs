@@ -62,7 +62,7 @@ async function actualizarPosicion(data) {
     };
     try {
       const empResp = await cEmpleados.findOneAndUpdate(data._id, { $set: { ubicacion } });
-      await actualizarHistorial(usuario, pos);
+      await procesarHistorial(usuario, pos);
       delete empResp.password;
       debug("***UBICACIÓN ACTUALIZADA***");
       return empResp;
@@ -77,7 +77,7 @@ async function actualizarPosicion(data) {
   return usuario;
 }
 
-async function actualizarHistorial(usuario, pos) {
+async function procesarHistorial(usuario, pos) {
   const queryHistorial = {
     $and: [
       { fecha: { $gte: moment().startOf("day") } },
@@ -88,28 +88,36 @@ async function actualizarHistorial(usuario, pos) {
   };
   const historial = await cHistorialPosicion.findOneFat(null, queryHistorial);
   if (historial) {
-    historial.lastUpdate = moment();
-    historial.ubicaciones.coordinates.push(pos.coordinates);
-    await cHistorialPosicion.updateOne(
-      historial._id,
-      historial,
-    );
+    actualizarHistorial(historial, pos);
   } else {
-    const otrasCoordenadas = [
-      Number(pos.coordinates[0].toFixed(5)),
-      Number(pos.coordinates[1].toFixed(5)),
-    ];
-    await cHistorialPosicion.create({
-      fecha: moment(),
-      cuenta: usuario.cuenta,
-      empleado: usuario._id,
-      lastUpdate: moment(),
-      ubicaciones: {
-        type: "LineString",
-        coordinates: [otrasCoordenadas, pos.coordinates],
-      },
-    });
+    crearHistorial(usuario, pos);
   }
+}
+
+async function actualizarHistorial(historial, pos) {
+  historial.lastUpdate = moment();
+  historial.ubicaciones.coordinates.push(pos.coordinates);
+  await cHistorialPosicion.updateOne(
+    historial._id,
+    historial,
+  );
+}
+
+async function crearHistorial(usuario, pos) {
+  const otrasCoordenadas = [
+    Number(pos.coordinates[0].toFixed(5)),
+    Number(pos.coordinates[1].toFixed(5)),
+  ];
+  await cHistorialPosicion.create({
+    fecha: moment(),
+    cuenta: usuario.cuenta,
+    empleado: usuario._id,
+    lastUpdate: moment(),
+    ubicaciones: {
+      type: "LineString",
+      coordinates: [otrasCoordenadas, pos.coordinates],
+    },
+  });
 }
 
 function iniciarOyente(app) {
