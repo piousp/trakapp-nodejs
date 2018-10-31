@@ -1,6 +1,7 @@
 import express from "express";
 import D from "debug";
 import map from "lodash/map";
+import { Types } from "mongoose";
 import renderizarHtml from "../../util/renderizarHtml.js";
 import modelo from "../modelos/empleado.js";
 import mensaje from "../modelos/mensaje";
@@ -20,6 +21,7 @@ router.get("/yo", getYo);
 router.get("/conmensajes", getConMensajes);
 router.get("/listarPorCuenta", listarPorCuenta);
 router.get("/listarCorreos/:id", listarCorreos);
+router.get("/buscadorchat/:txt", buscarEnChat);
 getID(router, modelo);
 
 export default router;
@@ -53,6 +55,7 @@ async function getConMensajes(req, res) {
     const empleados = await funBD(modelo).find({
       cuenta: req.cuenta,
       borrado: false,
+      ubicacion: { $exists: true },
     }, req.query);
     const empleadosConMensajes =
     await Promise.all(map(empleados.docs, e => getCantMensajesNoVistos(e, req.usuario)));
@@ -113,5 +116,42 @@ async function getYo(req, res) {
     ok(res)(resp);
   } catch (e) {
     error(res)(e);
+  }
+}
+
+async function buscarEnChat(req, res) {
+  const query = [
+    {
+      $project: {
+        nombreCompleto: { $concat: ["$nombre", " ", "$apellidos"] },
+        borrado: 1,
+        cuenta: 1,
+        nombre: 1,
+        apellidos: 1,
+        ubicacion: 1,
+      },
+    },
+    {
+      $match: {
+        nombreCompleto: { $regex: req.params.txt, $options: "gi" },
+        borrado: false,
+        cuenta: Types.ObjectId(req.cuenta),
+        ubicacion: { $exists: true },
+      },
+    },
+  ];
+  try {
+    const abs = skipLimitABS(req.query);
+    const empleados = await modelo
+      .aggregate(query)
+      .skip(abs.total)
+      .limit(abs.cantidad);
+    debug("Empleados encontrados:", empleados);
+    const empleadosConMensajes =
+    await Promise.all(map(empleados, e => getCantMensajesNoVistos(e, req.usuario)));
+    return ok(res)({ docs: empleadosConMensajes });
+  } catch (e) {
+    debug("Error buscando empleados del chat", e);
+    return res.status(500).end();
   }
 }
