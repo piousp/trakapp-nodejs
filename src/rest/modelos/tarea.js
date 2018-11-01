@@ -18,6 +18,10 @@ const esquema = new mongoose.Schema({
   ubicacion: {
     type: mongoose.Schema.Types.Point,
     index: "2dsphere",
+    default: {
+      type: "Point",
+      coordinates: [0, 0],
+    },
   },
   usarUbicacion: Boolean,
   empleado: {
