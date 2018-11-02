@@ -23,7 +23,10 @@ const esquema = new mongoose.Schema({
       coordinates: [0, 0],
     },
   },
-  usarUbicacion: Boolean,
+  usarUbicacion: {
+    type: Boolean,
+    default: true,
+  },
   empleado: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "empleado",
