@@ -27,6 +27,7 @@ const esquema = new mongoose.Schema({
   empleado: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "empleado",
+    required: true,
   },
   cuenta: {
     type: mongoose.Schema.Types.ObjectId,

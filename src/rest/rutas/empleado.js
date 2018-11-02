@@ -22,6 +22,7 @@ router.get("/conmensajes", getConMensajes);
 router.get("/listarPorCuenta", listarPorCuenta);
 router.get("/listarCorreos/:id", listarCorreos);
 router.get("/buscadorchat/:txt", buscarEnChat);
+router.get("/buscador/:txt", buscarBase);
 getID(router, modelo);
 
 export default router;
@@ -119,8 +120,16 @@ async function getYo(req, res) {
   }
 }
 
-async function buscarEnChat(req, res) {
-  const query = [
+function buscar(query, paginacion) {
+  const abs = skipLimitABS(paginacion);
+  return modelo
+    .aggregate(query)
+    .skip(abs.total)
+    .limit(abs.cantidad);
+}
+
+function getQueryBuscar(txt, cuenta) {
+  return [
     {
       $project: {
         nombreCompleto: { $concat: ["$nombre", " ", "$apellidos"] },
@@ -133,25 +142,35 @@ async function buscarEnChat(req, res) {
     },
     {
       $match: {
-        nombreCompleto: { $regex: req.params.txt, $options: "gi" },
+        nombreCompleto: { $regex: txt, $options: "gi" },
         borrado: false,
-        cuenta: Types.ObjectId(req.cuenta),
-        ubicacion: { $exists: true },
+        cuenta: Types.ObjectId(cuenta),
       },
     },
   ];
+}
+
+async function buscarBase(req, res) {
   try {
-    const abs = skipLimitABS(req.query);
-    const empleados = await modelo
-      .aggregate(query)
-      .skip(abs.total)
-      .limit(abs.cantidad);
+    const query = getQueryBuscar(req.params.txt, req.cuenta);
+    const empleados = await buscar(query, req.query);
+    return ok(res)(empleados);
+  } catch (e) {
+    return error(res)(e);
+  }
+}
+
+async function buscarEnChat(req, res) {
+  try {
+    const query = getQueryBuscar(req.params.txt, req.cuenta);
+    query[1].$match.ubicacion = { $exists: true };
+    const empleados = await buscar(query, req.query);
     debug("Empleados encontrados:", empleados);
     const empleadosConMensajes =
     await Promise.all(map(empleados, e => getCantMensajesNoVistos(e, req.usuario)));
     return ok(res)({ docs: empleadosConMensajes });
   } catch (e) {
     debug("Error buscando empleados del chat", e);
-    return res.status(500).end();
+    return error(res)(e);
   }
 }
