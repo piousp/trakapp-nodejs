@@ -19,7 +19,10 @@ const esquema = new mongoose.Schema({
     type: mongoose.Schema.Types.Point,
     index: "2dsphere",
   },
-  usarUbicacion: Boolean,
+  usarUbicacion: {
+    type: Boolean,
+    default: true,
+  },
   empleado: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "empleado",
