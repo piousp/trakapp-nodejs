@@ -102,7 +102,7 @@ async function listarXFecha(req, res) {
         $lte: req.query.fechaFin,
       },
     };
-    const tareas = await comun.find(query, null, "cliente");
+    const tareas = await comun.find(query, null, "cliente empleado");
     return ok(res)(tareas);
   } catch (e) {
     return error(res)(e);

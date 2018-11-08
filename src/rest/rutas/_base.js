@@ -44,7 +44,7 @@ function putID(router, modelo) {
   const comun = funDB(modelo);
   function putIDInterno(req, res) {
     debug("putID", req.body);
-    const quer = { _id: req.params.id, cuenta: req.cuenta, borrado: false };
+    const quer = { _id: req.params.id, borrado: false };
     comun.findOneAndUpdate(null, req.body, quer)
       .then(ok(res))
       .catch(error(res));
