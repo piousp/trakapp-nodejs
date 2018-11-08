@@ -22,5 +22,10 @@ async function enviarCorreo(pdata) {
   debug("Enviando correo");
   debug(pdata);
   const data = assign(cloneDeep(tmpData), pdata);
-  return mailgun.messages().send(data).then(resp => resp).catch(err => debug(err));
+  try {
+    return mailgun.messages().send(data);
+  } catch (err) {
+    debug(err);
+    return err;
+  }
 }
